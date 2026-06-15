@@ -1,1384 +1,685 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 
-// === CSS Styles ===
-const globalStyles = `
-  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Orbitron:wght@700;900&display=swap');
+const globalCSS = `
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Orbitron:wght@700;900&display=swap');
 
   :root {
-    --bg-dark: #050510;
-    --primary-violet: #7F77DD;
-    --light-lavender: #AFA9EC;
-    --glow-green: #39FF85;
-    --card-border: rgba(159,140,255,0.25);
+    --bg: #050510;
+    --accent: #7F77DD;
+    --accent-glow: rgba(127,119,221,0.5);
     --text-primary: #F0EEFF;
     --text-muted: #8A85B8;
   }
 
-  * {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-    cursor: none !important;
-  }
+  * { box-sizing: border-box; margin: 0; padding: 0; cursor: none !important; }
+  body { background: var(--bg); color: var(--text-primary); font-family: 'Inter', sans-serif; overflow-x: hidden; transition: background 0.5s; }
+  h1, h2, h3, h4, .orbitron { font-family: 'Orbitron', sans-serif; }
 
-  body {
-    background-color: var(--bg-dark);
-    color: var(--text-primary);
-    font-family: 'Inter', sans-serif;
-    overflow-x: hidden;
-  }
-
-  h1, h2, h3, h4, h5, h6, .orbitron {
-    font-family: 'Orbitron', sans-serif;
-  }
-
-  /* Custom Cursor */
-  #custom-cursor {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 12px;
-    height: 12px;
-    background-color: var(--primary-violet);
-    border-radius: 50%;
-    pointer-events: none;
-    z-index: 9999;
-    transform: translate(-50%, -50%);
-  }
-  #cursor-trail {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 4px;
-    height: 4px;
-    background-color: var(--light-lavender);
-    border-radius: 50%;
-    pointer-events: none;
-    z-index: 9998;
-    transform: translate(-50%, -50%);
-    transition: width 0.1s, height 0.1s;
-  }
-
-  /* Nebulas */
-  .nebula-top-left {
-    position: fixed;
-    top: -10%;
-    left: -10%;
-    width: 50vw;
-    height: 50vw;
-    background: radial-gradient(circle, #3D1F8A 0%, transparent 70%);
-    opacity: 0.2;
-    z-index: -2;
-    pointer-events: none;
-  }
-  .nebula-bottom-right {
-    position: fixed;
-    bottom: -10%;
-    right: -10%;
-    width: 60vw;
-    height: 60vw;
-    background: radial-gradient(circle, #1A1060 0%, transparent 70%);
-    opacity: 0.15;
-    z-index: -2;
-    pointer-events: none;
-  }
-
-  /* Canvas */
-  #starfield {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    z-index: -3;
-    pointer-events: none;
-  }
-
-  /* Anti-gravity float keyframes */
-  @keyframes float {
-    0%, 100% { transform: translateY(-12px); }
-    50% { transform: translateY(12px); }
-  }
-
-  .anti-gravity {
-    animation: float var(--float-dur, 5s) ease-in-out infinite;
-    animation-delay: var(--float-del, 0s);
-  }
+  /* Utilities */
+  .glass { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(12px); border-radius: 20px; }
+  .section-title { font-size: clamp(28px, 4vw, 48px); text-align: center; text-shadow: 0 0 30px var(--accent-glow); margin-bottom: 3rem; }
+  .eyebrow { color: var(--text-muted); font-family: monospace; text-align: center; margin-bottom: 0.5rem; font-size: 14px; }
   
-  .parallax-layer {
-    transform: translate(calc(var(--mouse-x, 0) * 1px), calc(var(--mouse-y, 0) * 1px));
-    transition: transform 0.1s linear;
-  }
+  /* Nebulas */
+  .nebula { position: fixed; filter: blur(120px); border-radius: 50%; opacity: 0.12; pointer-events: none; z-index: -2; animation: nebPulse 8s infinite alternate; }
+  .neb-1 { width: 600px; height: 400px; background: #3D1F8A; top: -10%; left: -10%; }
+  .neb-2 { width: 600px; height: 400px; background: #1A1060; bottom: -10%; right: -10%; }
+  .neb-3 { width: 500px; height: 500px; background: #0D2B2B; top: 30%; left: 30%; }
+  @keyframes nebPulse { 0% { opacity: 0.08; } 100% { opacity: 0.18; } }
 
-  /* Glassmorphism */
-  .glass-card {
-    background: rgba(255,255,255,0.04);
-    border: 1px solid var(--card-border);
-    border-radius: 20px;
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    box-shadow: 0 8px 32px rgba(127,119,221,0.15);
-  }
+  /* Cursor */
+  #cursor-ring { position: fixed; width: 24px; height: 24px; border: 1.5px solid var(--accent); border-radius: 50%; pointer-events: none; z-index: 9999; transform: translate(-50%, -50%); transition: width 0.2s, height 0.2s, background 0.2s; }
+  #cursor-dot { position: fixed; width: 6px; height: 6px; background: var(--accent); border-radius: 50%; pointer-events: none; z-index: 9999; transform: translate(-50%, -50%); }
+  #cursor-ring.hover { width: 40px; height: 40px; background: rgba(127,119,221,0.1); }
+  
+  .particle { position: fixed; width: 4px; height: 4px; background: var(--accent); border-radius: 50%; pointer-events: none; z-index: 9998; animation: burst 0.4s forwards; }
+  @keyframes burst { 0% { transform: translate(-50%, -50%) scale(1); opacity: 1; } 100% { transform: translate(var(--tx), var(--ty)) scale(0); opacity: 0; } }
 
-  /* Scroll reveal */
-  .reveal-section {
-    opacity: 0;
-    transform: translateY(40px);
-    transition: all 0.7s cubic-bezier(0.22, 1, 0.36, 1);
-  }
-  .reveal-section.visible {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  /* Scroll Progress */
+  #progress-bar { position: fixed; top: 0; left: 0; height: 3px; background: linear-gradient(90deg, var(--accent), #39FF85); box-shadow: 0 0 10px var(--accent); z-index: 1001; transition: width 0.1s; }
+  
+  /* Scroll Spy Dots */
+  .spy-dots { position: fixed; right: 24px; top: 50%; transform: translateY(-50%); display: flex; flex-direction: column; gap: 15px; z-index: 1000; }
+  .spy-dot { width: 6px; height: 6px; border: 1px solid var(--text-muted); border-radius: 50%; transition: all 0.3s; position: relative; }
+  .spy-dot.active { width: 10px; height: 10px; background: var(--accent); border-color: var(--accent); box-shadow: 0 0 10px var(--accent); }
+  .spy-tooltip { position: absolute; right: 20px; top: 50%; transform: translateY(-50%); background: var(--bg); padding: 4px 8px; font-size: 10px; border-radius: 4px; border: 1px solid var(--accent); opacity: 0; pointer-events: none; transition: 0.3s; white-space: nowrap; }
+  .spy-dot:hover .spy-tooltip { opacity: 1; }
 
-  .section-title {
-    font-size: clamp(28px, 4vw, 48px);
-    text-shadow: 0 0 30px rgba(127,119,221,0.8);
-    text-align: center;
-    margin-bottom: 3rem;
-  }
-  .eyebrow {
-    color: var(--text-muted);
-    font-family: monospace;
-    text-align: center;
-    margin-bottom: 0.5rem;
-    font-size: 14px;
-  }
+  /* Back to Top Rocket */
+  .rocket-btn { position: fixed; bottom: 80px; right: 24px; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; z-index: 1000; font-size: 20px; opacity: 0; pointer-events: none; transition: 0.3s; }
+  .rocket-btn.visible { opacity: 1; pointer-events: auto; }
+  .rocket-btn.shake { animation: shake 0.5s; }
+  @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-3px) rotate(-5deg); } 75% { transform: translateX(3px) rotate(5deg); } }
 
-  /* Navbar */
-  .navbar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 60px;
-    background: rgba(5,5,16,0.8);
-    backdrop-filter: blur(20px);
-    z-index: 1000;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0 40px;
-    border-bottom: 1px solid rgba(159,140,255,0.1);
-  }
-  .nav-logo {
-    color: var(--primary-violet);
-    font-size: 24px;
-    font-weight: 900;
-    text-shadow: 0 0 10px rgba(127,119,221,0.5);
-  }
-  .nav-links {
-    display: flex;
-    gap: 30px;
-  }
-  .nav-link {
-    color: var(--light-lavender);
-    text-decoration: none;
-    font-weight: 500;
-    font-size: 14px;
-    position: relative;
-    padding: 5px 0;
-    transition: color 0.3s;
-  }
-  .nav-link:hover, .nav-link.active {
-    color: var(--primary-violet);
-  }
-  .nav-link::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 0;
-    height: 2px;
-    background: var(--primary-violet);
-    transition: width 0.3s ease;
-  }
-  .nav-link:hover::after, .nav-link.active::after {
-    width: 100%;
-  }
+  /* Theme Switcher */
+  .theme-btn { position: fixed; bottom: 24px; right: 24px; width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; z-index: 1000; font-size: 24px; transition: 0.3s; }
+  .theme-btn:hover { transform: scale(1.1); box-shadow: 0 0 20px var(--accent-glow); }
+  .theme-tooltip { position: absolute; right: 60px; top: 50%; transform: translateY(-50%); background: var(--bg); padding: 4px 8px; font-size: 12px; border-radius: 4px; border: 1px solid var(--accent); opacity: 0; pointer-events: none; transition: 0.3s; white-space: nowrap; }
+  .theme-btn:hover .theme-tooltip { opacity: 1; }
 
-  /* Layout */
-  .container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 100px 20px;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-  }
+  /* Container & Reveal */
+  .container { max-width: 1200px; margin: 0 auto; padding: 100px 20px; min-height: 100vh; position: relative; }
+  .reveal { opacity: 0; transform: translateY(40px); transition: all 0.7s cubic-bezier(0.22, 1, 0.36, 1); }
+  .reveal.visible { opacity: 1; transform: translateY(0); }
 
   /* Hero Section */
-  .hero-container {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    min-height: 100vh;
-    padding-top: 60px;
+  .hero { display: flex; align-items: center; justify-content: space-between; min-height: 100vh; }
+  .hero-left { width: 45%; }
+  .hero-right { width: 55%; display: flex; justify-content: center; perspective: 1000px; position: relative; }
+  .glitch { animation: glitchAnim 1.5s ease-out; }
+  @keyframes glitchAnim {
+    0%, 100% { text-shadow: 0 0 40px var(--accent-glow); }
+    10% { text-shadow: 2px 0 red, -2px 0 blue; }
+    20% { text-shadow: -2px 0 red, 2px 0 blue; }
+    30% { text-shadow: 2px 0 red, -2px 0 blue; }
   }
-  .hero-left {
-    width: 45%;
-  }
-  .hero-right {
-    width: 55%;
-    display: flex;
-    justify-content: center;
-    position: relative;
-  }
-  .hero-eyebrow {
-    font-family: monospace;
-    color: var(--primary-violet);
-    font-size: 14px;
-    margin-bottom: 10px;
-  }
-  .cursor-blink {
-    animation: blink 1s step-end infinite;
-  }
-  @keyframes blink { 50% { opacity: 0; } }
-  .hero-title {
-    font-size: clamp(48px, 7vw, 96px);
-    color: #fff;
-    text-shadow: 0 0 40px rgba(127,119,221,0.9);
-    line-height: 1.1;
-    margin-bottom: 15px;
-  }
-  .hero-subtitle {
-    font-size: 18px;
-    color: var(--light-lavender);
-    margin-bottom: 30px;
-  }
-  .hero-ctas {
-    display: flex;
-    gap: 15px;
-    margin-bottom: 40px;
-  }
-  .btn-primary {
-    background: var(--primary-violet);
-    color: #fff;
-    padding: 12px 28px;
-    border-radius: 50px;
-    border: none;
-    font-size: 16px;
-    font-weight: 500;
-    text-decoration: none;
-    transition: all 0.3s;
-  }
-  .btn-primary:hover {
-    transform: scale(1.05);
-    box-shadow: 0 0 20px rgba(127,119,221,0.6);
-  }
-  .btn-outline {
-    background: transparent;
-    color: var(--primary-violet);
-    padding: 12px 28px;
-    border-radius: 50px;
-    border: 2px solid var(--primary-violet);
-    font-size: 16px;
-    font-weight: 500;
-    text-decoration: none;
-    transition: all 0.3s;
-  }
-  .btn-outline:hover {
-    background: rgba(127,119,221,0.1);
-  }
-  .stat-pills {
-    display: flex;
-    gap: 15px;
-    flex-wrap: wrap;
-  }
-  .stat-pill {
-    background: rgba(255,255,255,0.04);
-    border: 1px solid var(--card-border);
-    border-radius: 50px;
-    padding: 8px 16px;
-    font-size: 13px;
-    color: var(--text-primary);
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    backdrop-filter: blur(10px);
-  }
-  .stat-dot {
-    width: 6px;
-    height: 6px;
-    background: var(--primary-violet);
-    border-radius: 50%;
+  .hero-title { font-size: clamp(48px, 7vw, 96px); line-height: 1.1; margin: 10px 0; color: #fff; }
+  .hero-subtitle { font-size: 18px; color: var(--text-muted); margin-bottom: 30px; }
+  
+  .stats-row { display: flex; gap: 20px; margin-bottom: 30px; }
+  .stat-item { text-align: center; }
+  .stat-num { font-size: 32px; color: var(--accent); text-shadow: 0 0 15px var(--accent-glow); }
+  .stat-lbl { font-size: 12px; color: var(--text-muted); }
+
+  .hero-ctas { display: flex; gap: 15px; }
+  .btn-sweep { position: relative; overflow: hidden; background: var(--accent); color: #fff; padding: 12px 28px; border-radius: 50px; font-weight: 600; text-decoration: none; border: none; display: inline-block; cursor: pointer; }
+  .btn-sweep::after { content: ''; position: absolute; top: 0; left: -100%; width: 50%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent); animation: sweep 3s infinite; }
+  @keyframes sweep { 0% { left: -100%; } 20%, 100% { left: 200%; } }
+  .btn-outline { background: transparent; color: var(--accent); border: 2px solid var(--accent); padding: 12px 28px; border-radius: 50px; text-decoration: none; font-weight: 600; }
+
+  /* Phone Mockup 3D */
+  .phone-3d-wrapper { transition: transform 0.1s linear; transform-style: preserve-3d; }
+  .phone-mockup { width: 280px; height: 560px; border-radius: 44px; border: 2px solid rgba(159,140,255,0.4); background: #0D0D1F; box-shadow: inset 0 0 40px rgba(0,0,0,0.8), 0 30px 60px var(--accent-glow); position: relative; overflow: hidden; }
+  .phone-notch { position: absolute; top: 10px; left: 50%; transform: translateX(-50%); width: 90px; height: 28px; background: #000; border-radius: 14px; z-index: 10; }
+  .phone-screen { position: absolute; top:0; left:0; width:100%; height:100%; background: #0A0A1E; padding: 45px 15px 15px; transition: opacity 0.5s; display: flex; flex-direction: column; gap: 15px; }
+  
+  .orbit-satellite { position: absolute; background: #0D0D1F; border: 1px solid var(--accent); color: var(--text-primary); padding: 4px 10px; border-radius: 20px; font-size: 11px; font-family: monospace; animation: ellipticalOrbit linear infinite; transform-style: preserve-3d; }
+  @keyframes ellipticalOrbit {
+    0% { transform: rotate(0deg) translateX(180px) rotate(0deg); }
+    100% { transform: rotate(360deg) translateX(180px) rotate(-360deg); }
   }
 
-  /* Phone Mockup */
-  .phone-mockup {
-    width: 280px;
-    height: 560px;
-    border-radius: 44px;
-    border: 2px solid rgba(159,140,255,0.4);
-    background: #0D0D1F;
-    box-shadow: inset 0 0 40px rgba(0,0,0,0.8);
-    position: relative;
-    overflow: hidden;
-    animation: phoneFloat 6s ease-in-out infinite;
-  }
-  @keyframes phoneFloat {
-    0%, 100% { transform: translateY(-15px) rotate(-1deg); }
-    50% { transform: translateY(15px) rotate(1deg); }
-  }
-  .phone-notch {
-    position: absolute;
-    top: 10px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 90px;
-    height: 28px;
-    background: #000;
-    border-radius: 14px;
-    z-index: 10;
-  }
-  .phone-screen {
-    position: absolute;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background: #0A0A1E;
-    padding: 45px 15px 15px;
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-  }
-  .app-bar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    color: #fff;
-    font-size: 14px;
-    font-weight: 500;
-  }
-  .summary-cards {
-    display: flex;
-    gap: 8px;
-  }
-  .summary-card {
-    flex: 1;
-    border-radius: 12px;
-    padding: 10px 8px;
-    text-align: center;
-  }
-  .summary-card.c1 { background: rgba(127,119,221,0.2); border: 1px solid rgba(127,119,221,0.4); }
-  .summary-card.c2 { background: rgba(57,255,133,0.1); border: 1px solid rgba(57,255,133,0.3); }
-  .summary-card.c3 { background: rgba(59,130,246,0.2); border: 1px solid rgba(59,130,246,0.4); }
-  .summary-val { font-size: 16px; font-weight: 700; color: #fff; }
-  .summary-lbl { font-size: 9px; color: rgba(255,255,255,0.7); margin-top: 4px; }
-  .recent-header {
-    display: flex;
-    justify-content: space-between;
-    font-size: 12px;
-    color: #fff;
-    margin-top: 5px;
-  }
-  .list-item {
-    background: rgba(255,255,255,0.05);
-    border-radius: 10px;
-    padding: 10px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-  .list-left .name { font-size: 12px; color: #fff; }
-  .list-left .inv { font-size: 10px; color: var(--text-muted); }
-  .badge {
-    font-size: 9px;
-    padding: 3px 6px;
-    border-radius: 10px;
-  }
-  .badge.paid { background: rgba(57,255,133,0.2); color: #39FF85; }
-  .badge.pending { background: rgba(234,179,8,0.2); color: #eab308; }
-  .badge.due { background: rgba(239,68,68,0.2); color: #ef4444; }
-  .bottom-nav {
-    position: absolute;
-    bottom: 10px;
-    left: 15px;
-    right: 15px;
-    background: rgba(255,255,255,0.1);
-    border-radius: 20px;
-    height: 50px;
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
-  }
-  .nav-icon {
-    width: 20px;
-    height: 20px;
-    background: rgba(255,255,255,0.3);
-    border-radius: 50%;
-  }
-  .nav-icon.active { background: var(--primary-violet); }
+  /* Solar System Skills */
+  .solar-system { position: relative; width: 600px; height: 600px; margin: 0 auto; display: flex; align-items: center; justify-content: center; }
+  .sun { width: 120px; height: 120px; background: radial-gradient(circle, var(--accent), #3D1F8A); border-radius: 50%; box-shadow: 0 0 40px var(--accent), 0 0 80px var(--accent-glow); display: flex; align-items: center; justify-content: center; font-family: 'Orbitron'; font-weight: bold; color: white; animation: sunPulse 3s infinite alternate; z-index: 10; }
+  @keyframes sunPulse { 0% { box-shadow: 0 0 40px var(--accent), 0 0 80px var(--accent-glow); } 100% { box-shadow: 0 0 60px var(--accent), 0 0 120px var(--accent-glow); } }
+  
+  .orbit-ring { position: absolute; border: 1px dashed rgba(127,119,221,0.2); border-radius: 50%; transform-style: preserve-3d; }
+  .ring-inner { width: 300px; height: 300px; animation: spin var(--dur) linear infinite; }
+  .ring-outer { width: 500px; height: 500px; animation: spin var(--dur) linear infinite; }
+  .planet-container { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(calc(var(--angle) * 1deg)) translateX(var(--radius)); }
+  .planet { width: 50px; height: 50px; background: var(--bg); border: 1px solid var(--accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; text-align: center; color: var(--text-primary); animation: spinReverse var(--dur) linear infinite; transition: 0.3s; position: relative; cursor: pointer; }
+  .planet:hover { transform: scale(1.3); z-index: 20; background: var(--accent); box-shadow: 0 0 20px var(--accent); }
+  .p-tooltip { position: absolute; top: 120%; width: 150px; background: var(--bg); border: 1px solid var(--accent); padding: 8px; border-radius: 8px; font-size: 10px; opacity: 0; pointer-events: none; transition: 0.3s; z-index: 30; }
+  .planet:hover .p-tooltip { opacity: 1; }
 
-  .orbit-label {
-    position: absolute;
-    background: #0D0D1F;
-    border: 1px solid var(--primary-violet);
-    color: var(--text-primary);
-    font-family: monospace;
-    font-size: 12px;
-    padding: 6px 12px;
-    border-radius: 20px;
-  }
-  .orbit-1 { bottom: 10%; left: -20px; }
-  .orbit-2 { top: 40%; left: -40px; }
-  .orbit-3 { top: 15%; right: -30px; }
-  .orbit-4 { bottom: 25%; right: -20px; }
-  .orbit-5 { top: 5%; left: 10px; }
-  .orbit-6 { top: 50%; right: -50px; }
+  @keyframes spin { 100% { transform: rotate(360deg); } }
+  @keyframes spinReverse { 100% { transform: rotate(-360deg); } }
 
-  .avail-badge {
-    position: absolute;
-    top: 50px;
-    right: -30px;
-    background: rgba(57,255,133,0.1);
-    border: 1px solid var(--glow-green);
-    color: var(--glow-green);
-    font-size: 13px;
-    padding: 6px 14px;
-    border-radius: 50px;
-    animation: availGlow 2s infinite;
-    z-index: 20;
-  }
-  @keyframes availGlow {
-    0%, 100% { box-shadow: 0 0 10px var(--glow-green); }
-    50% { box-shadow: 0 0 20px var(--glow-green); }
-  }
-
-  /* Skills Section */
-  .skills-clusters {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 30px;
-    position: relative;
-    min-height: 400px;
-    align-items: center;
-  }
-  .skill-cluster {
-    padding: 20px;
-    min-width: 250px;
-    transition: transform 0.3s;
-  }
-  .skill-cluster:hover {
-    transform: translateY(-8px);
-    box-shadow: 0 15px 40px rgba(127,119,221,0.25);
-  }
-  .cluster-title {
-    font-family: 'Orbitron', sans-serif;
-    color: var(--light-lavender);
-    margin-bottom: 15px;
-    font-size: 16px;
-  }
-  .cluster-pills {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-  }
-  .skill-pill {
-    background: rgba(127,119,221,0.12);
-    border: 1px solid rgba(127,119,221,0.3);
-    border-radius: 50px;
-    padding: 6px 16px;
-    color: var(--light-lavender);
-    font-size: 13px;
-    transition: all 0.3s;
-  }
-  .skill-pill:hover {
-    background: rgba(127,119,221,0.3);
-    color: #fff;
-    transform: scale(1.08);
-    box-shadow: 0 0 15px rgba(127,119,221,0.5);
-  }
-  .c-purple { border-left: 3px solid var(--primary-violet); }
-  .c-blue { border-left: 3px solid #3b82f6; }
-  .c-green { border-left: 3px solid var(--glow-green); transform: scale(1.05); box-shadow: 0 0 20px rgba(57,255,133,0.1); }
-  .c-yellow { border-left: 3px solid #eab308; }
-  .c-white { border-left: 3px solid #fff; }
-  .primary-skill {
-    font-weight: 700;
-    color: #fff;
-    border-color: var(--primary-violet);
-    background: rgba(127,119,221,0.25);
-  }
-  .flagship-skill {
-    font-size: 15px;
-    padding: 8px 20px;
-    font-weight: 700;
-    color: #fff;
-    border-color: #3b82f6;
-    background: rgba(59,130,246,0.2);
-  }
-  .core-label {
-    position: absolute;
-    top: -12px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: var(--glow-green);
-    color: #000;
-    font-size: 10px;
-    font-weight: 700;
-    padding: 2px 8px;
-    border-radius: 10px;
-  }
+  .asteroid { position: absolute; background: rgba(127,119,221,0.1); border: 1px solid rgba(127,119,221,0.3); padding: 4px 10px; border-radius: 20px; font-size: 11px; animation: float 4s ease-in-out infinite alternate; animation-delay: var(--del); }
+  @keyframes float { 0% { transform: translateY(-10px); } 100% { transform: translateY(10px); } }
 
   /* Experience Section */
-  .mission-card {
-    padding: 40px;
-    transform: rotate(-0.5deg);
-    position: relative;
-    overflow: hidden;
-  }
-  .mission-bar {
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 3px;
-    background: linear-gradient(90deg, #7F77DD, #AFA9EC);
-  }
-  .mission-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 20px;
-  }
-  .mh-left { display: flex; gap: 15px; align-items: center; }
-  .mh-logo {
-    width: 48px; height: 48px;
-    background: rgba(127,119,221,0.2);
-    border-radius: 10px;
-    display: flex; justify-content: center; align-items: center;
-    color: var(--primary-violet); font-weight: 900;
-  }
-  .mh-title { font-size: 20px; font-weight: 600; color: #fff; }
-  .mh-role { color: var(--light-lavender); font-size: 14px; margin-top: 4px; }
-  .mh-date {
-    border: 1px solid rgba(255,255,255,0.2);
-    padding: 6px 12px;
-    border-radius: 20px;
-    font-size: 12px;
-    color: var(--text-muted);
-  }
-  .mission-divider {
-    height: 1px;
-    background: rgba(159,140,255,0.2);
-    margin: 20px 0;
-  }
-  .mission-sub {
-    font-size: 16px;
-    color: var(--primary-violet);
-    margin-bottom: 5px;
-  }
-  .mission-client {
-    color: var(--text-muted);
-    font-size: 14px;
-    margin-bottom: 20px;
-  }
-  .mission-desc {
-    color: var(--text-muted);
-    font-size: 15px;
-    line-height: 1.6;
-    margin-bottom: 25px;
-  }
-  .mission-obj-title {
-    font-size: 12px;
-    text-transform: uppercase;
-    color: var(--text-muted);
-    margin-bottom: 10px;
-    letter-spacing: 1px;
-  }
-  .mission-list { list-style: none; display: flex; flex-direction: column; gap: 12px; margin-bottom: 30px; }
-  .mission-list li {
-    display: flex;
-    gap: 10px;
-    align-items: flex-start;
-    color: var(--text-primary);
-    font-size: 14px;
-    line-height: 1.5;
-  }
-  .mission-list li::before {
-    content: '▸';
-    color: var(--primary-violet);
-  }
-  .tech-row {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-  }
+  .exp-wrapper { display: flex; position: relative; }
+  .timeline { width: 2px; background: var(--accent); position: absolute; left: 0; top: 0; height: 0; transition: height 1s ease-out; transition-delay: 0.5s; }
+  .exp-wrapper.visible .timeline { height: 100%; }
+  .timeline-dot { width: 12px; height: 12px; background: var(--bg); border: 2px solid var(--accent); border-radius: 50%; position: absolute; left: -5px; top: 0; box-shadow: 0 0 10px var(--accent); }
+  
+  .mission-card { margin-left: 30px; padding: 40px; position: relative; overflow: hidden; transform: translateX(-100px); opacity: 0; transition: all 1s cubic-bezier(0.34, 1.56, 0.64, 1); }
+  .exp-wrapper.visible .mission-card { transform: translateX(0); opacity: 1; }
+  .scanline { position: absolute; top:0; left:0; width:100%; height:100%; background: repeating-linear-gradient(transparent, transparent 2px, rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px); pointer-events: none; z-index: -1; }
+  
+  .tech-pill-wrapper { perspective: 600px; width: 100px; height: 30px; }
+  .tech-pill-inner { width: 100%; height: 100%; position: relative; transition: transform 0.6s; transform-style: preserve-3d; }
+  .tech-pill-wrapper:hover .tech-pill-inner { transform: rotateY(180deg); }
+  .tech-front, .tech-back { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; display: flex; align-items: center; justify-content: center; border-radius: 50px; font-size: 11px; }
+  .tech-front { background: rgba(127,119,221,0.1); border: 1px solid var(--accent); }
+  .tech-back { background: var(--accent); color: #fff; transform: rotateY(180deg); }
 
-  /* Projects Section */
-  .project-card {
-    display: flex;
-    padding: 40px;
-    gap: 40px;
-    align-items: center;
-  }
-  .proj-left { width: 55%; }
-  .proj-right {
-    width: 45%;
-    display: flex;
-    justify-content: center;
-    perspective: 800px;
-  }
-  .proj-eyebrow {
-    color: var(--glow-green);
-    font-size: 12px;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    margin-bottom: 10px;
-  }
-  .proj-title {
-    font-size: 32px;
-    color: #fff;
-    margin-bottom: 5px;
-  }
-  .proj-sub {
-    color: var(--light-lavender);
-    font-size: 16px;
-    margin-bottom: 20px;
-  }
-  .proj-desc {
-    color: var(--text-muted);
-    line-height: 1.6;
-    margin-bottom: 25px;
-    font-size: 15px;
-  }
-  .proj-features {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin-bottom: 25px;
-  }
-  .feat-pill {
-    background: rgba(57,255,133,0.1);
-    border: 1px solid var(--glow-green);
-    color: var(--glow-green);
-    padding: 6px 12px;
-    border-radius: 50px;
-    font-size: 12px;
-  }
-  .proj-client {
-    font-size: 14px;
-    color: var(--text-muted);
-    margin-top: 15px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-  .mini-phone {
-    width: 160px;
-    height: 320px;
-    border-radius: 25px;
-    border: 4px solid rgba(159,140,255,0.4);
-    background: #0D0D1F;
-    box-shadow: 0 20px 40px rgba(0,0,0,0.5);
-    position: relative;
-    overflow: hidden;
-    transform: rotateY(-5deg) rotateX(3deg);
-  }
-  .mini-notch {
-    position: absolute;
-    top: 5px; left: 50%; transform: translateX(-50%);
-    width: 50px; height: 15px;
-    background: #000; border-radius: 8px;
-    z-index: 10;
-  }
-  .mini-screen {
-    width: 100%; height: 100%;
-    background: #0A0A1E;
-    position: absolute;
-    top:0; left:0;
-    padding: 25px 10px 10px;
-    transition: opacity 0.5s ease;
-  }
+  /* Projects */
+  .holo-card { position: relative; overflow: hidden; }
+  .holo-overlay { position: absolute; top:0; left:0; width:100%; height:100%; background: linear-gradient(var(--grad-angle, 45deg), rgba(127,119,221,0.15), rgba(57,255,133,0.1), rgba(127,119,221,0.15)); mix-blend-mode: color-dodge; opacity: 0; transition: opacity 0.3s; pointer-events: none; }
+  .holo-card:hover .holo-overlay { opacity: 1; }
+  
+  .feat-tag { display: inline-block; transition: 0.3s; }
+  .feat-tag:hover { transform: translateY(-4px); box-shadow: 0 0 15px #39FF85; }
+  .live-btn { display: inline-flex; align-items: center; gap: 8px; border: 1px solid #39FF85; color: #39FF85; padding: 6px 16px; border-radius: 20px; font-size: 12px; cursor: pointer; background: rgba(57,255,133,0.05); }
+  .live-dot { width: 8px; height: 8px; background: #39FF85; border-radius: 50%; animation: pulseGreen 1.5s infinite; }
+  @keyframes pulseGreen { 0% { box-shadow: 0 0 0 0 rgba(57,255,133,0.7); } 70% { box-shadow: 0 0 0 10px rgba(57,255,133,0); } 100% { box-shadow: 0 0 0 0 rgba(57,255,133,0); } }
 
-  /* Education Section */
-  .diploma-wrapper {
-    display: flex;
-    justify-content: center;
-  }
-  .diploma-card {
-    width: 60%;
-    padding: 50px;
-    text-align: center;
-    transform: rotate(0.3deg);
-    position: relative;
-    overflow: hidden;
-    box-shadow: 0 0 30px rgba(127,119,221,0.3), 0 0 60px rgba(127,119,221,0.1);
-  }
-  .shimmer {
-    position: absolute;
-    top: 0; left: 0; width: 100%; height: 100%;
-    background: linear-gradient(90deg, transparent 0%, rgba(159,140,255,0.08) 50%, transparent 100%);
-    animation: shimmerAnim 6s infinite;
-    pointer-events: none;
-  }
-  @keyframes shimmerAnim {
-    0% { transform: translateX(-100%); }
-    50%, 100% { transform: translateX(200%); }
-  }
-  .constellation { margin: 0 auto 20px; width: 60px; height: 40px; }
-  .deg-title { font-size: 22px; color: #fff; margin-bottom: 8px; }
-  .col-name { font-size: 16px; color: var(--light-lavender); margin-bottom: 5px; }
-  .edu-date { font-size: 14px; color: var(--text-muted); margin-bottom: 30px; }
-  .cgpa-val { font-size: 48px; color: var(--primary-violet); text-shadow: 0 0 20px rgba(127,119,221,0.6); line-height: 1; }
-  .cgpa-max { font-size: 20px; color: var(--text-muted); font-family: 'Inter', sans-serif;}
-  .cgpa-lbl { font-size: 12px; color: var(--text-muted); margin-top: 5px; letter-spacing: 2px;}
-  .cgpa-dots { display: flex; justify-content: center; gap: 6px; margin: 20px 0 30px; }
-  .cdot { width: 10px; height: 10px; border-radius: 50%; }
-  .cdot.filled { background: var(--primary-violet); box-shadow: 0 0 8px var(--primary-violet); }
-  .cdot.empty { border: 1px solid rgba(127,119,221,0.4); }
-  .edu-tags { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
+  .screenshot-strip { display: flex; gap: 15px; overflow-x: auto; padding: 20px 0; scrollbar-width: none; }
+  .screenshot-strip::-webkit-scrollbar { display: none; }
+  .ss-item { min-width: 100px; height: 200px; border-radius: 12px; border: 2px solid rgba(255,255,255,0.1); background: #0A0A1E; padding: 10px; }
+  
+  /* Education */
+  .shimmer-card { position: relative; overflow: hidden; }
+  .shimmer-card::before { content: ''; position: absolute; top:0; left:-150%; width: 100%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent); transform: skewX(-20deg); transition: 0.5s; }
+  .shimmer-card:hover::before { left: 150%; transition: 0.8s ease-in-out; }
+  .constellation-path { stroke-dasharray: 200; stroke-dashoffset: 200; transition: stroke-dashoffset 2s ease-out; transition-delay: 0.5s; }
+  .visible .constellation-path { stroke-dashoffset: 0; }
+  
+  .cgpa-dot { width: 10px; height: 10px; border-radius: 50%; border: 1px solid var(--accent); transition: background 0.3s; }
+  .cgpa-dot.filled { background: var(--accent); box-shadow: 0 0 8px var(--accent); animation: pop 0.3s forwards; }
+  @keyframes pop { 50% { transform: scale(1.3); } }
 
-  /* Contact Section */
-  .contact-row {
-    display: flex;
-    justify-content: center;
-    gap: 40px;
-    margin-bottom: 60px;
-  }
-  .contact-pod {
-    width: 120px;
-    height: 120px;
-    border-radius: 50%;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    text-decoration: none;
-    color: var(--text-primary);
-    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    position: relative;
-  }
-  .contact-pod:hover {
-    transform: scale(1.15) rotate(10deg);
-    border-color: var(--primary-violet);
-    box-shadow: 0 0 30px rgba(127,119,221,0.4);
-  }
-  .pod-icon { font-size: 28px; margin-bottom: 8px; color: var(--primary-violet); }
-  .pod-lbl { font-size: 14px; font-family: 'Orbitron', sans-serif; }
-  .pod-tooltip {
-    position: absolute;
-    bottom: -30px;
-    background: var(--primary-violet);
-    color: #fff;
-    font-size: 11px;
-    padding: 4px 8px;
-    border-radius: 4px;
-    opacity: 0;
-    transition: opacity 0.3s;
-    pointer-events: none;
-    white-space: nowrap;
-  }
-  .contact-pod:hover .pod-tooltip { opacity: 1; }
+  /* Contact */
+  .pod-wrapper { perspective: 1000px; width: 120px; height: 120px; }
+  .pod-inner { width: 100%; height: 100%; position: relative; transition: transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1); transform-style: preserve-3d; }
+  .pod-wrapper:hover .pod-inner { transform: rotateY(180deg); }
+  .pod-front, .pod-back { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+  .pod-front { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); }
+  .pod-back { background: var(--accent); color: #fff; transform: rotateY(180deg); font-size: 11px; padding: 10px; text-align: center; }
+  
+  .transporter-btn { position: relative; }
+  .beam { position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); width: 2px; background: linear-gradient(to top, var(--accent), transparent); height: 0; opacity: 0; transition: 0.3s; }
+  .transporter-btn:hover .beam { height: 80px; opacity: 1; animation: beamAnim 1s infinite; }
+  @keyframes beamAnim { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; height: 100px; top: -100px; } }
 
-  .open-banner {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 30px 40px;
-    max-width: 800px;
-    margin: 0 auto;
-  }
-  .ob-text { font-size: 16px; color: #fff; width: 60%; line-height: 1.5; }
-  .ob-btn {
-    background: var(--primary-violet);
-    color: #fff;
-    padding: 15px 30px;
-    border-radius: 50px;
-    font-family: 'Orbitron', sans-serif;
-    text-decoration: none;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    transition: all 0.3s;
-    animation: btnGlow 2s infinite;
-  }
-  .ob-btn:hover { transform: scale(1.05); }
-  .ob-btn:hover .arrow { transform: translateX(5px); }
-  .arrow { transition: transform 0.3s; }
-  @keyframes btnGlow {
-    0%, 100% { box-shadow: 0 0 15px rgba(127,119,221,0.5); }
-    50% { box-shadow: 0 0 30px rgba(127,119,221,0.8); }
-  }
+  .contact-form { max-height: 0; overflow: hidden; transition: max-height 0.5s ease; margin-top: 20px; }
+  .contact-form.open { max-height: 400px; }
+  .form-input { width: 100%; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 12px; color: #fff; border-radius: 8px; margin-bottom: 15px; outline: none; transition: 0.3s; font-family: 'Inter'; }
+  .form-input:focus { border-color: var(--accent); }
 
-  .footer {
-    border-top: 1px solid rgba(159,140,255,0.1);
-    text-align: center;
-    padding: 30px 20px;
-    margin-top: 60px;
-    color: var(--text-muted);
-    font-size: 12px;
-  }
-
-  .sk-pos-1 { position: absolute; top: 0; left: 0; }
-  .sk-pos-2 { position: absolute; top: 0; right: 0; }
-  .sk-pos-3 { z-index: 10; }
-  .sk-pos-4 { position: absolute; bottom: 0; left: 10%; }
-  .sk-pos-5 { position: absolute; bottom: 0; right: 10%; }
+  .toast { position: fixed; bottom: -50px; left: 50%; transform: translateX(-50%); background: #39FF85; color: #000; padding: 10px 20px; border-radius: 20px; font-weight: bold; transition: bottom 0.3s; z-index: 2000; }
+  .toast.show { bottom: 30px; }
 
   @media (max-width: 768px) {
-    #custom-cursor, #cursor-trail { display: none !important; }
+    #cursor-ring, #cursor-dot { display: none !important; }
     * { cursor: auto !important; }
-    
-    .sk-pos-1, .sk-pos-2, .sk-pos-3, .sk-pos-4, .sk-pos-5 {
-      position: relative !important;
-      top: auto !important; left: auto !important; right: auto !important; bottom: auto !important;
-      width: 100%;
-    }
-    .hero-container { flex-direction: column; text-align: center; gap: 40px; }
+    .solar-system { display: none !important; }
+    .mobile-skills { display: flex !important; flex-direction: column; gap: 15px; }
+    .hero { flex-direction: column; text-align: center; gap: 40px; padding-top: 100px; }
     .hero-left, .hero-right { width: 100%; }
-    .hero-ctas { justify-content: center; }
-    .stat-pills { justify-content: center; }
-    .phone-mockup { width: 220px; height: 440px; }
-    .orbit-label { display: none; }
+    .stats-row, .hero-ctas { justify-content: center; }
+    .phone-mockup { width: 220px; height: 440px; margin: 0 auto; }
+    .orbit-satellite { display: none; }
+    .mission-card { margin-left: 15px; padding: 20px; }
     .project-card { flex-direction: column; }
     .proj-left, .proj-right { width: 100%; }
-    .diploma-card { width: 100%; padding: 30px 20px; }
-    .contact-row { flex-direction: column; align-items: center; gap: 20px; }
-    .open-banner { flex-direction: column; text-align: center; gap: 20px; }
-    .ob-text { width: 100%; }
-    .nav-links { display: none; }
-    .mission-header { flex-direction: column; gap: 15px; }
-    .mh-left { flex-direction: column; text-align: center; }
-    .mh-date { align-self: center; }
-    .mission-card { padding: 25px; }
-    .project-card { padding: 25px; }
-    .diploma-card { width: 100%; padding: 30px 20px; }
     .mini-phone { margin: 0 auto; transform: none; width: 220px; }
-    .cgpa-dots { flex-wrap: wrap; }
-    .cgpa-val { font-size: 36px; }
+    .diploma-card { padding: 30px 15px; }
+    .spy-dots { display: none; }
   }
+  .mobile-skills { display: none; }
 `;
 
-// === Hooks ===
+const THEMES = {
+  deepSpace: { bg: '#050510', accent: '#7F77DD', accentGlow: 'rgba(127,119,221,0.5)' },
+  nebula: { bg: '#0D0520', accent: '#C77DFF', accentGlow: 'rgba(199,125,255,0.5)' },
+  aurora: { bg: '#020D0D', accent: '#00F5D4', accentGlow: 'rgba(0,245,212,0.5)' }
+};
 
-function useMouseParallax() {
+function useMouse() {
+  const [pos, setPos] = useState({ x: -100, y: -100 });
+  const [hover, setHover] = useState(false);
   useEffect(() => {
-    const handleMouseMove = (e) => {
-      const x = (e.clientX / window.innerWidth - 0.5) * 20;
-      const y = (e.clientY / window.innerHeight - 0.5) * 20;
-      document.documentElement.style.setProperty('--mouse-x', x);
-      document.documentElement.style.setProperty('--mouse-y', y);
-    };
-    window.addEventListener('mousemove', handleMouseMove);
-    return () => window.removeEventListener('mousemove', handleMouseMove);
+    const move = e => setPos({ x: e.clientX, y: e.clientY });
+    const over = e => setHover(!!e.target.closest('a, button, .planet, .pod-wrapper, .tech-pill-wrapper'));
+    window.addEventListener('mousemove', move);
+    window.addEventListener('mouseover', over);
+    return () => { window.removeEventListener('mousemove', move); window.removeEventListener('mouseover', over); }
   }, []);
+  return { pos, hover };
 }
 
 function useScrollReveal() {
   useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add('visible');
-          }
-        });
-      },
-      { threshold: 0.15 }
-    );
-    const elements = document.querySelectorAll('.reveal-section');
-    elements.forEach((el) => observer.observe(el));
+    const observer = new IntersectionObserver(e => {
+      e.forEach(entry => {
+        if (entry.isIntersecting) entry.target.classList.add('visible');
+      });
+    }, { threshold: 0.15 });
+    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
     return () => observer.disconnect();
   }, []);
 }
 
-function useScrollSpy(sections) {
-  const [activeId, setActiveId] = useState('');
-  useEffect(() => {
-    const handleScroll = () => {
-      let current = '';
-      for (let id of sections) {
-        const el = document.getElementById(id);
-        if (el && window.scrollY >= el.offsetTop - 150) {
-          current = id;
-        }
-      }
-      setActiveId(current);
-    };
-    window.addEventListener('scroll', handleScroll);
-    handleScroll();
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, [sections]);
-  return activeId;
-}
-
-// === Components ===
-
-const CustomCursor = () => {
-  const cursorRef = useRef(null);
-  const trailRef = useRef(null);
-  const mouse = useRef({ x: -100, y: -100 });
-  const cursor = useRef({ x: -100, y: -100 });
+function CustomCursor({ pos, hover }) {
+  const outer = useRef(null);
   const trail = useRef({ x: -100, y: -100 });
-
   useEffect(() => {
-    const onMouseMove = (e) => {
-      mouse.current.x = e.clientX;
-      mouse.current.y = e.clientY;
-    };
-    window.addEventListener('mousemove', onMouseMove);
-
-    let animationFrame;
+    let frame;
     const render = () => {
-      // Lerp
-      cursor.current.x += (mouse.current.x - cursor.current.x) * 0.2;
-      cursor.current.y += (mouse.current.y - cursor.current.y) * 0.2;
-      trail.current.x += (mouse.current.x - trail.current.x) * 0.1;
-      trail.current.y += (mouse.current.y - trail.current.y) * 0.1;
-
-      if (cursorRef.current) {
-        cursorRef.current.style.left = `${cursor.current.x}px`;
-        cursorRef.current.style.top = `${cursor.current.y}px`;
+      trail.current.x += (pos.x - trail.current.x) * 0.08;
+      trail.current.y += (pos.y - trail.current.y) * 0.08;
+      if (outer.current) {
+        outer.current.style.left = `${trail.current.x}px`;
+        outer.current.style.top = `${trail.current.y}px`;
       }
-      if (trailRef.current) {
-        trailRef.current.style.left = `${trail.current.x}px`;
-        trailRef.current.style.top = `${trail.current.y}px`;
-      }
-      animationFrame = requestAnimationFrame(render);
+      frame = requestAnimationFrame(render);
     };
     render();
+    return () => cancelAnimationFrame(frame);
+  }, [pos]);
 
-    return () => {
-      window.removeEventListener('mousemove', onMouseMove);
-      cancelAnimationFrame(animationFrame);
+  const [particles, setParticles] = useState([]);
+  useEffect(() => {
+    const click = e => {
+      const newP = Array.from({length: 8}).map((_, i) => {
+        const angle = (i / 8) * Math.PI * 2;
+        return { id: Date.now() + i, x: e.clientX, y: e.clientY, tx: Math.cos(angle)*40, ty: Math.sin(angle)*40 };
+      });
+      setParticles(p => [...p, ...newP]);
+      setTimeout(() => setParticles(p => p.filter(pt => !newP.includes(pt))), 400);
     };
+    window.addEventListener('click', click);
+    return () => window.removeEventListener('click', click);
   }, []);
 
   return (
     <>
-      <div id="custom-cursor" ref={cursorRef}></div>
-      <div id="cursor-trail" ref={trailRef}></div>
+      <div id="cursor-ring" ref={outer} className={hover ? 'hover' : ''}></div>
+      <div id="cursor-dot" style={{ left: pos.x, top: pos.y, opacity: hover ? 0 : 1 }}></div>
+      {particles.map(p => (
+        <div key={p.id} className="particle" style={{ left: p.x, top: p.y, '--tx': `${p.tx}px`, '--ty': `${p.ty}px` }}></div>
+      ))}
     </>
   );
-};
+}
 
-const Starfield = () => {
+function Starfield() {
   const canvasRef = useRef(null);
-
   useEffect(() => {
-    const canvas = canvasRef.current;
-    const ctx = canvas.getContext('2d');
-    let animationFrame;
-
-    const resize = () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-    };
+    const c = canvasRef.current;
+    const ctx = c.getContext('2d');
+    let frame;
+    const resize = () => { c.width = window.innerWidth; c.height = window.innerHeight; };
     window.addEventListener('resize', resize);
     resize();
 
-    const stars = Array.from({ length: 200 }).map(() => ({
-      x: Math.random() * canvas.width,
-      y: Math.random() * canvas.height,
-      r: Math.random() * 0.7 + 0.8,
-      v: Math.random() * 0.15 + 0.05
-    }));
+    const stars = [
+      ...Array.from({length: 300}).map(() => ({ x: Math.random()*c.width, y: Math.random()*c.height, r: 0.5, s: 0.02, o: 0.4 })),
+      ...Array.from({length: 150}).map(() => ({ x: Math.random()*c.width, y: Math.random()*c.height, r: 1, s: 0.06, o: 0.7 })),
+      ...Array.from({length: 50}).map(() => ({ x: Math.random()*c.width, y: Math.random()*c.height, r: 1.5, s: 0.12, o: 1 }))
+    ];
+    let shootingStars = [];
 
     const draw = () => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.fillStyle = 'rgba(255,255,255,0.6)';
-      stars.forEach(star => {
-        ctx.beginPath();
-        ctx.arc(star.x, star.y, star.r, 0, Math.PI * 2);
-        ctx.fill();
-        star.y += star.v;
-        if (star.y > canvas.height) {
-          star.y = 0;
-          star.x = Math.random() * canvas.width;
-        }
+      ctx.clearRect(0,0,c.width,c.height);
+      stars.forEach(st => {
+        if (Math.random() < 0.001) st.twinkle = 60;
+        let op = st.o;
+        if (st.twinkle) { op = 1; st.twinkle--; }
+        ctx.fillStyle = `rgba(255,255,255,${op})`;
+        ctx.beginPath(); ctx.arc(st.x, st.y, st.r, 0, Math.PI*2); ctx.fill();
+        st.y += st.s;
+        if (st.y > c.height) { st.y = 0; st.x = Math.random()*c.width; }
       });
-      animationFrame = requestAnimationFrame(draw);
+
+      if (Math.random() < 0.005) {
+        shootingStars.push({ x: Math.random()*c.width, y: 0, life: 60, max: 60 });
+      }
+      shootingStars = shootingStars.filter(ss => ss.life > 0);
+      shootingStars.forEach(ss => {
+        ctx.strokeStyle = `rgba(255,255,255,${Math.sin((ss.life/ss.max)*Math.PI)})`;
+        ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(ss.x, ss.y); ctx.lineTo(ss.x - 80, ss.y + 80); ctx.stroke();
+        ss.x -= 8; ss.y += 8; ss.life--;
+      });
+
+      frame = requestAnimationFrame(draw);
     };
     draw();
+    return () => { window.removeEventListener('resize', resize); cancelAnimationFrame(frame); }
+  }, []);
+  return <canvas id="starfield" style={{position:'fixed', top:0, left:0, zIndex:-3, pointerEvents:'none'}}></canvas>;
+}
 
-    return () => {
-      window.removeEventListener('resize', resize);
-      cancelAnimationFrame(animationFrame);
-    };
+function useTypewriter(words) {
+  const [text, setText] = useState('');
+  const [wordIdx, setWordIdx] = useState(0);
+  const [isDeleting, setIsDeleting] = useState(false);
+  
+  useEffect(() => {
+    const current = words[wordIdx];
+    let timeout;
+    if (isDeleting) {
+      if (text.length > 0) timeout = setTimeout(() => setText(current.substring(0, text.length - 1)), 40);
+      else { setIsDeleting(false); setWordIdx((i) => (i + 1) % words.length); }
+    } else {
+      if (text.length < current.length) timeout = setTimeout(() => setText(current.substring(0, text.length + 1)), 80);
+      else timeout = setTimeout(() => setIsDeleting(true), 2000);
+    }
+    return () => clearTimeout(timeout);
+  }, [text, isDeleting, wordIdx, words]);
+  return text;
+}
+
+function Counter({ target, duration }) {
+  const [count, setCount] = useState(0);
+  const [started, setStarted] = useState(false);
+  const ref = useRef(null);
+
+  useEffect(() => {
+    const ob = new IntersectionObserver(e => {
+      if(e[0].isIntersecting) setStarted(true);
+    });
+    if(ref.current) ob.observe(ref.current);
+    return () => ob.disconnect();
   }, []);
 
-  return <canvas id="starfield" ref={canvasRef}></canvas>;
-};
-
-const Navbar = ({ activeId }) => {
-  const links = ['hero', 'skills', 'experience', 'projects', 'education', 'contact'];
-  return (
-    <nav className="navbar">
-      <div className="nav-logo">UJ</div>
-      <div className="nav-links">
-        {links.map(link => (
-          <a 
-            key={link} 
-            href={`#${link}`} 
-            className={`nav-link ${activeId === link ? 'active' : ''}`}
-            onClick={(e) => {
-              e.preventDefault();
-              document.getElementById(link).scrollIntoView({ behavior: 'smooth' });
-            }}
-          >
-            {link.charAt(0).toUpperCase() + link.slice(1)}
-          </a>
-        ))}
-      </div>
-    </nav>
-  );
-};
+  useEffect(() => {
+    if (!started) return;
+    let start;
+    let frame;
+    const update = (timestamp) => {
+      if (!start) start = timestamp;
+      const progress = Math.min((timestamp - start) / duration, 1);
+      const ease = progress === 1 ? 1 : 1 - Math.pow(2, -10 * progress);
+      setCount(target * ease);
+      if (progress < 1) frame = requestAnimationFrame(update);
+    };
+    frame = requestAnimationFrame(update);
+    return () => cancelAnimationFrame(frame);
+  }, [target, duration, started]);
+  
+  const display = target % 1 === 0 ? Math.floor(count) : count.toFixed(2);
+  return <span ref={ref}>{display}</span>;
+}
 
 export default function App() {
-  useMouseParallax();
+  const [theme, setTheme] = useState('deepSpace');
+  const { pos, hover } = useMouse();
   useScrollReveal();
-  const activeSection = useScrollSpy(['hero', 'skills', 'experience', 'projects', 'education', 'contact']);
 
   useEffect(() => {
-    const styleSheet = document.createElement("style");
-    styleSheet.innerText = globalStyles;
-    document.head.appendChild(styleSheet);
-    return () => styleSheet.remove();
+    const style = document.createElement('style');
+    style.innerHTML = globalCSS;
+    document.head.appendChild(style);
+    return () => style.remove();
   }, []);
 
-  const [activeScreen, setActiveScreen] = useState(0);
   useEffect(() => {
-    const interval = setInterval(() => {
-      setActiveScreen(prev => (prev + 1) % 3);
-    }, 3000);
-    return () => clearInterval(interval);
+    const saved = localStorage.getItem('theme');
+    if (saved && THEMES[saved]) setTheme(saved);
   }, []);
+
+  useEffect(() => {
+    const t = THEMES[theme];
+    document.documentElement.style.setProperty('--bg', t.bg);
+    document.documentElement.style.setProperty('--accent', t.accent);
+    document.documentElement.style.setProperty('--accent-glow', t.accentGlow);
+    localStorage.setItem('theme', theme);
+  }, [theme]);
+
+  const [scrollP, setScrollP] = useState(0);
+  const [activeSec, setActiveSec] = useState('hero');
+  useEffect(() => {
+    const handleScroll = () => {
+      const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+      const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+      setScrollP((winScroll / height) * 100);
+      
+      const sections = ['hero', 'skills', 'experience', 'projects', 'education', 'contact'];
+      for(let s of sections) {
+        const el = document.getElementById(s);
+        if (el && window.scrollY >= el.offsetTop - 300) setActiveSec(s);
+      }
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const typeTextHero = useTypewriter(["Flutter Developer", "Mobile Engineer", "Clean Arch Advocate", "Dart Specialist"]);
+  const typeTextExp = useTypewriter(["Mission: Invoice Flow Enterprise Billing"]);
+  
+  const [screenIdx, setScreenIdx] = useState(0);
+  useEffect(() => {
+    const i = setInterval(() => setScreenIdx(p => (p+1)%3), 3000);
+    return () => clearInterval(i);
+  }, []);
+
+  const [formOpen, setFormOpen] = useState(false);
+  const [toast, setToast] = useState(false);
+  const copyEmail = () => {
+    navigator.clipboard.writeText("udayjamariya12@gmail.com");
+    setToast(true); setTimeout(() => setToast(false), 2000);
+  };
+
+  const phoneRef = useRef(null);
+  const [phoneRot, setPhoneRot] = useState({x:0, y:0});
+  useEffect(() => {
+    if (!phoneRef.current) return;
+    const rect = phoneRef.current.getBoundingClientRect();
+    const cx = rect.left + rect.width/2;
+    const cy = rect.top + rect.height/2;
+    const dx = (pos.x - cx) / (window.innerWidth/2);
+    const dy = (pos.y - cy) / (window.innerHeight/2);
+    setPhoneRot({ x: -dy * 4, y: dx * 8 });
+  }, [pos]);
 
   return (
     <>
-      <CustomCursor />
+      <CustomCursor pos={pos} hover={hover} />
       <Starfield />
-      <div className="nebula-top-left"></div>
-      <div className="nebula-bottom-right"></div>
-      <Navbar activeId={activeSection} />
+      <div className="nebula neb-1"></div><div className="nebula neb-2"></div><div className="nebula neb-3"></div>
+      
+      <div id="progress-bar" style={{ width: `${scrollP}%` }}></div>
+      
+      <div className="spy-dots">
+        {['hero', 'skills', 'experience', 'projects', 'education', 'contact'].map(s => (
+          <div key={s} className={`spy-dot ${activeSec === s ? 'active' : ''}`} onClick={() => document.getElementById(s).scrollIntoView({behavior:'smooth'})}>
+            <div className="spy-tooltip">{s.charAt(0).toUpperCase() + s.slice(1)}</div>
+          </div>
+        ))}
+      </div>
 
-      {/* --- HERO SECTION --- */}
-      <section id="hero" className="container reveal-section">
-        <div className="hero-container">
+      <button className={`rocket-btn glass ${scrollP > 10 ? 'visible' : ''}`} onClick={(e) => { e.currentTarget.classList.add('shake'); setTimeout(() => e.currentTarget.classList.remove('shake'), 500); window.scrollTo({top:0, behavior:'smooth'}); }}>🚀</button>
+
+      <button className="theme-btn glass" onClick={() => {
+        const keys = Object.keys(THEMES);
+        setTheme(keys[(keys.indexOf(theme) + 1) % keys.length]);
+      }}>
+        🎨<div className="theme-tooltip">Switch Theme</div>
+      </button>
+
+      {/* HERO */}
+      <section id="hero" className="container reveal">
+        <div className="hero">
           <div className="hero-left">
-            <div className="hero-eyebrow">&lt; Flutter Developer /&gt;<span className="cursor-blink">|</span></div>
-            <h1 className="hero-title">Uday<br/>Jamariya</h1>
-            <p className="hero-subtitle">Flutter Developer · Cross-Platform · Clean Architecture</p>
-            <div className="hero-ctas">
-              <a href="#projects" className="btn-primary">View My Work →</a>
-              <a href="#" className="btn-outline">Download Resume</a>
+            <div className="eyebrow" style={{textAlign:'left'}}>&lt; {typeTextHero} <span style={{animation:'blink 1s step-end infinite'}}>|</span> /&gt;</div>
+            <h1 className="hero-title glitch">Uday<br/>Jamariya</h1>
+            <p className="hero-subtitle">Cross-Platform · Clean Architecture</p>
+            
+            <div className="stats-row">
+              <div className="stat-item"><div className="stat-num"><Counter target={1} duration={1000}/></div><div className="stat-lbl">App Shipped</div></div>
+              <div className="stat-item"><div className="stat-num"><Counter target={6} duration={1500}/></div><div className="stat-lbl">Months Exp</div></div>
+              <div className="stat-item"><div className="stat-num"><Counter target={5} duration={1200}/>+</div><div className="stat-lbl">Technologies</div></div>
             </div>
-            <div className="stat-pills">
-              <div className="stat-pill anti-gravity parallax-layer" style={{'--float-del': '0s'}}><div className="stat-dot"></div>1 App Shipped</div>
-              <div className="stat-pill anti-gravity parallax-layer" style={{'--float-del': '1s'}}><div className="stat-dot"></div>6 Months Experience</div>
-              <div className="stat-pill anti-gravity parallax-layer" style={{'--float-del': '2s'}}><div className="stat-dot"></div>3 State Managers</div>
+
+            <div className="hero-ctas">
+              <a href="#projects" className="btn-sweep">View My Work →</a>
+              <a href="#contact" className="btn-outline">Contact Me</a>
             </div>
           </div>
           
           <div className="hero-right">
-            <div className="avail-badge">Available for Work</div>
-            
-            <div className="phone-mockup">
-              <div className="phone-notch"></div>
-              <div className="phone-screen">
-                <div className="app-bar">
-                  <span>Invoice Flow</span>
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
-                </div>
+            <div className="phone-3d-wrapper" style={{ transform: `rotateX(${phoneRot.x}deg) rotateY(${phoneRot.y}deg)` }}>
+              <div className="phone-mockup" ref={phoneRef}>
+                <div className="phone-notch"></div>
                 
-                <div className="summary-cards">
-                  <div className="summary-card c1">
-                    <div className="summary-val">24</div>
-                    <div className="summary-lbl">Invoices</div>
+                {/* Screens */}
+                <div className="phone-screen" style={{opacity: screenIdx===0?1:0, zIndex: screenIdx===0?2:1}}>
+                  <div style={{display:'flex', justifyContent:'space-between', color:'#fff', fontWeight:600}}>Invoice Flow <span>🔔</span></div>
+                  <div style={{display:'flex', gap:5}}>
+                    <div style={{flex:1, background:'var(--accent)', padding:10, borderRadius:8, textAlign:'center'}}><div style={{fontWeight:'bold'}}>24</div><div style={{fontSize:9}}>Invs</div></div>
+                    <div style={{flex:1, background:'#1A7A6E', padding:10, borderRadius:8, textAlign:'center'}}><div style={{fontWeight:'bold', color:'#fff'}}>18</div><div style={{fontSize:9, color:'#fff'}}>Clients</div></div>
+                    <div style={{flex:1, background:'#3D1F8A', padding:10, borderRadius:8, textAlign:'center'}}><div style={{fontWeight:'bold', color:'#fff'}}>₹1.2L</div><div style={{fontSize:9, color:'#fff'}}>Rev</div></div>
                   </div>
-                  <div className="summary-card c2">
-                    <div className="summary-val">18</div>
-                    <div className="summary-lbl">Customers</div>
-                  </div>
-                  <div className="summary-card c3">
-                    <div className="summary-val">₹1.2L</div>
-                    <div className="summary-lbl">Revenue</div>
+                  <div style={{fontSize:12, color:'#fff', display:'flex', justifyContent:'space-between'}}>Recent <span style={{color:'#39FF85'}}>View All</span></div>
+                  {[['Ramesh', 'Paid', '#39FF85'],['Patel', 'Pending', '#eab308'],['Shah', 'Due', '#ef4444']].map(r => (
+                    <div key={r[0]} style={{display:'flex', justifyContent:'space-between', padding:8, background:'rgba(255,255,255,0.05)', borderRadius:8}}>
+                      <div style={{fontSize:11, color:'#fff'}}>{r[0]}</div><div style={{fontSize:9, padding:'2px 6px', borderRadius:10, border:`1px solid ${r[2]}`, color:r[2]}}>{r[1]}</div>
+                    </div>
+                  ))}
+                  <div style={{position:'absolute', bottom:10, left:10, right:10, height:50, background:'rgba(255,255,255,0.1)', borderRadius:25, display:'flex', justifyContent:'space-around', alignItems:'center'}}>
+                    <div style={{width:20,height:20, borderRadius:'50%', background:'var(--accent)'}}></div>
+                    <div style={{width:20,height:20, borderRadius:'50%', background:'rgba(255,255,255,0.3)'}}></div>
+                    <div style={{width:20,height:20, borderRadius:'50%', background:'rgba(255,255,255,0.3)'}}></div>
                   </div>
                 </div>
 
-                <div className="recent-header">
-                  <span>Recent Invoices</span>
-                  <span style={{color: 'var(--primary-violet)'}}>View All</span>
+                <div className="phone-screen" style={{opacity: screenIdx===1?1:0, background:'#0F0F20', zIndex: screenIdx===1?2:1}}>
+                   <div style={{color:'#fff', fontWeight:600}}>All Invoices</div>
+                   {[1,2,3,4,5].map(i => <div key={i} style={{height:40, background:i%2===0?'rgba(255,255,255,0.03)':'transparent', borderRadius:4}}></div>)}
                 </div>
 
-                <div className="list-item">
-                  <div className="list-left">
-                    <div className="name">Ramesh Auto</div>
-                    <div className="inv">INV-001</div>
+                <div className="phone-screen" style={{opacity: screenIdx===2?1:0, zIndex: screenIdx===2?2:1}}>
+                  <div style={{color:'#fff', fontWeight:600}}>Analytics</div>
+                  <div style={{height:150, display:'flex', alignItems:'flex-end', gap:10, borderBottom:'1px solid rgba(255,255,255,0.2)'}}>
+                    <div style={{flex:1, height:'40%', background:'var(--accent)'}}></div>
+                    <div style={{flex:1, height:'70%', background:'#1A7A6E'}}></div>
+                    <div style={{flex:1, height:'50%', background:'#3D1F8A'}}></div>
                   </div>
-                  <div className="badge paid">Paid</div>
-                </div>
-                <div className="list-item">
-                  <div className="list-left">
-                    <div className="name">Patel Motors</div>
-                    <div className="inv">INV-002</div>
-                  </div>
-                  <div className="badge pending">Pending</div>
-                </div>
-                <div className="list-item">
-                  <div className="list-left">
-                    <div className="name">Shah Cars</div>
-                    <div className="inv">INV-003</div>
-                  </div>
-                  <div className="badge due">Due</div>
                 </div>
 
-                <div className="bottom-nav">
-                  <div className="nav-icon active"></div>
-                  <div className="nav-icon"></div>
-                  <div className="nav-icon"></div>
-                  <div className="nav-icon"></div>
-                </div>
               </div>
             </div>
 
-            <div className="orbit-label orbit-1 anti-gravity parallax-layer" style={{'--float-del': '0.5s'}}>Container()</div>
-            <div className="orbit-label orbit-2 anti-gravity parallax-layer" style={{'--float-del': '1.2s'}}>Scaffold()</div>
-            <div className="orbit-label orbit-3 anti-gravity parallax-layer" style={{'--float-del': '2.1s'}}>ListView()</div>
-            <div className="orbit-label orbit-4 anti-gravity parallax-layer" style={{'--float-del': '0.8s'}}>Bloc()</div>
-            <div className="orbit-label orbit-5 anti-gravity parallax-layer" style={{'--float-del': '3.2s'}}>Firebase</div>
-            <div className="orbit-label orbit-6 anti-gravity parallax-layer" style={{'--float-del': '1.7s'}}>GetX()</div>
-          </div>
-        </div>
-      </section>
-
-      {/* --- SKILLS SECTION --- */}
-      <section id="skills" className="container reveal-section">
-        <div className="eyebrow">// what I work with</div>
-        <h2 className="section-title orbitron">Skills.dart</h2>
-        
-        <div className="skills-clusters">
-          {/* Languages */}
-          <div className="skill-cluster glass-card anti-gravity parallax-layer c-purple sk-pos-1" style={{'--float-del': '0s'}}>
-            <div className="cluster-title">🟣 Languages</div>
-            <div className="cluster-pills">
-              <div className="skill-pill primary-skill">Dart</div>
-              <div className="skill-pill">HTML</div>
-              <div className="skill-pill">CSS (Basic)</div>
-            </div>
-          </div>
-          
-          {/* Frameworks */}
-          <div className="skill-cluster glass-card anti-gravity parallax-layer c-blue sk-pos-2" style={{'--float-del': '1.2s'}}>
-            <div className="cluster-title">🔵 Frameworks</div>
-            <div className="cluster-pills">
-              <div className="skill-pill flagship-skill">Flutter SDK</div>
-              <div className="skill-pill">Material Design</div>
-              <div className="skill-pill">Cupertino Widgets</div>
-            </div>
-          </div>
-
-          {/* State Mgmt */}
-          <div className="skill-cluster glass-card anti-gravity parallax-layer c-green sk-pos-3" style={{'--float-del': '2.4s'}}>
-            <div className="core-label">Core Expertise</div>
-            <div className="cluster-title">🟢 State Management</div>
-            <div className="cluster-pills">
-              <div className="skill-pill">Bloc</div>
-              <div className="skill-pill">Provider</div>
-              <div className="skill-pill">GetX</div>
-            </div>
-          </div>
-
-          {/* Databases */}
-          <div className="skill-cluster glass-card anti-gravity parallax-layer c-yellow sk-pos-4" style={{'--float-del': '0.6s'}}>
-            <div className="cluster-title">🟡 Databases</div>
-            <div className="cluster-pills">
-              <div className="skill-pill">SQLite</div>
-              <div className="skill-pill">Firebase</div>
-              <div className="skill-pill">MySQL</div>
-            </div>
-          </div>
-
-          {/* Tools */}
-          <div className="skill-cluster glass-card anti-gravity parallax-layer c-white sk-pos-5" style={{'--float-del': '1.8s'}}>
-            <div className="cluster-title">⚪ Other Skills</div>
-            <div className="cluster-pills">
-              <div className="skill-pill">REST API</div>
-              <div className="skill-pill">Responsive UI</div>
-              <div className="skill-pill">App Store</div>
-              <div className="skill-pill">Optimization</div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* --- EXPERIENCE SECTION --- */}
-      <section id="experience" className="container reveal-section">
-        <div className="eyebrow">// mission history</div>
-        <h2 className="section-title orbitron">Experience.log</h2>
-
-        <div className="mission-card glass-card anti-gravity parallax-layer" style={{'--float-dur': '7s', '--float-del': '1s'}}>
-          <div className="mission-bar"></div>
-          <div className="mission-header">
-            <div className="mh-left">
-              <div className="mh-logo">EP</div>
-              <div>
-                <div className="mh-title">Excel PTP – Unit of Amar Infotech</div>
-                <div className="mh-role">Flutter Developer Intern</div>
-              </div>
-            </div>
-            <div className="mh-date">DEC 2025 – MAY 2026</div>
-          </div>
-          
-          <div className="mission-divider"></div>
-          
-          <div className="mission-sub orbitron">Mission: Invoice Flow Enterprise Billing</div>
-          <div className="mission-client">Client: Somnath Auto</div>
-          
-          <p className="mission-desc">
-            "Engineered a real-world enterprise billing and expense tracking application for an automobile service business using Flutter and Firebase — featuring invoice generation, customer & vehicle management, payment tracking, expense monitoring, PDF sharing, WhatsApp reminders, and a business analytics dashboard."
-          </p>
-
-          <div className="mission-obj-title">Mission Objectives</div>
-          <ul className="mission-list">
-            <li>Built high-performance UI screens for product catalogs, user profiles, and secure checkout.</li>
-            <li>Developed reusable Flutter widgets for consistent design language and scalable architecture.</li>
-            <li>Integrated RESTful APIs and Firebase for real-time product availability, pricing, and order history.</li>
-            <li>Optimized app performance and memory usage — smooth scrolling, fast image loading across devices.</li>
-            <li>Implemented clean Dart code with state management best practices (Bloc, Provider, GetX).</li>
-          </ul>
-
-          <div className="tech-row">
-            {['Flutter', 'Firebase', 'Dart', 'Bloc', 'REST API', 'Clean Architecture'].map(t => (
-              <span key={t} className="skill-pill">{t}</span>
+            {/* Satellites */}
+            {[{t:'Container()', dur:'8s', y:200, d:0}, {t:'Scaffold()', dur:'12s', y:100, d:-2}, {t:'Bloc()', dur:'10s', y:-50, d:-4}, {t:'Firebase', dur:'15s', y:-150, d:-1}, {t:'GetX()', dur:'9s', y:50, d:-3}].map((s,i) => (
+              <div key={i} className="orbit-satellite" style={{animationDuration: s.dur, animationDelay: `${s.d}s`, top: '50%', marginTop: `${s.y}px` }}>{s.t}</div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* --- PROJECTS SECTION --- */}
-      <section id="projects" className="container reveal-section">
-        <div className="eyebrow">// deployed apps</div>
-        <h2 className="section-title orbitron">Projects.apk</h2>
+      {/* SKILLS */}
+      <section id="skills" className="container reveal">
+        <h2 className="section-title">Skills.dart</h2>
+        <div className="solar-system">
+          <div className="sun">Flutter</div>
+          <div className="orbit-ring ring-inner" style={{'--dur':'20s'}}>
+            <div className="planet-container" style={{'--angle': 0, '--radius': '150px'}}><div className="planet" style={{'--dur':'20s'}}>Dart<div className="p-tooltip">Core Language</div></div></div>
+            <div className="planet-container" style={{'--angle': 120, '--radius': '150px'}}><div className="planet" style={{'--dur':'20s'}}>Bloc<div className="p-tooltip">State Mgmt</div></div></div>
+            <div className="planet-container" style={{'--angle': 240, '--radius': '150px'}}><div className="planet" style={{'--dur':'20s'}}>Firebase<div className="p-tooltip">Backend</div></div></div>
+          </div>
+          <div className="orbit-ring ring-outer" style={{'--dur':'35s'}}>
+            {[ {t:'GetX',a:0}, {t:'Provider',a:72}, {t:'REST',a:144}, {t:'SQLite',a:216}, {t:'Material',a:288} ].map(p => (
+              <div key={p.t} className="planet-container" style={{'--angle': p.a, '--radius': '250px'}}><div className="planet" style={{'--dur':'35s'}}>{p.t}</div></div>
+            ))}
+          </div>
+          <div className="asteroid" style={{top:'10%', left:'20%', '--del':'0s'}}>HTML / CSS</div>
+          <div className="asteroid" style={{top:'80%', left:'80%', '--del':'1s'}}>Git</div>
+          <div className="asteroid" style={{top:'20%', right:'10%', '--del':'2s'}}>App Store</div>
+        </div>
+        <div className="mobile-skills glass" style={{padding:20}}>
+          <div style={{color:'var(--accent)', fontWeight:'bold', marginBottom:10}}>Core Expertise:</div>
+          <div style={{display:'flex', gap:10, flexWrap:'wrap'}}>{['Flutter', 'Dart', 'Bloc', 'Firebase', 'GetX', 'REST API'].map(s => <div key={s} style={{padding:'6px 12px', border:'1px solid var(--accent)', borderRadius:20, fontSize:12}}>{s}</div>)}</div>
+        </div>
+      </section>
 
-        <div className="project-card glass-card anti-gravity parallax-layer" style={{'--float-dur': '6s'}}>
-          <div className="proj-left">
-            <div className="proj-eyebrow">Featured Project</div>
-            <h3 className="proj-title orbitron">Invoice Flow</h3>
-            <div className="proj-sub">Enterprise Billing & Expense Tracker</div>
-            <p className="proj-desc">
-              "A full-featured enterprise billing system for automobile service businesses — real-time invoice generation, customer/vehicle management, payment tracking, expense monitoring, PDF invoice sharing via WhatsApp, and an interactive business analytics dashboard."
-            </p>
-            <div className="proj-features">
-              {['Invoice Generation', 'PDF Sharing', 'WhatsApp Reminders', 'Analytics Dashboard', 'Payment Tracking', 'Vehicle Management'].map(f => (
-                <div key={f} className="feat-pill">{f}</div>
+      {/* EXPERIENCE */}
+      <section id="experience" className="container reveal">
+        <h2 className="section-title">Experience.log</h2>
+        <div className="exp-wrapper reveal">
+          <div className="timeline" id="exp-timeline"><div className="timeline-dot"></div></div>
+          <div className="mission-card glass" id="exp-card">
+            <div className="scanline"></div>
+            <div style={{color:'var(--text-muted)', fontSize:12, marginBottom:10}}>DEC 2025 – MAY 2026</div>
+            <h3 style={{color:'#fff', fontSize:20, marginBottom:5}}>Excel PTP – Unit of Amar Infotech</h3>
+            <div style={{color:'var(--accent)', fontSize:16, marginBottom:20, fontFamily:'monospace'}}>&gt; {typeTextExp}</div>
+            <p style={{color:'var(--text-muted)', fontSize:14, lineHeight:1.6, marginBottom:20}}>Engineered a real-world enterprise billing and expense tracking application for an automobile service business using Flutter and Firebase...</p>
+            <div style={{display:'flex', gap:10, flexWrap:'wrap'}}>
+              {[{f:'Flutter', b:'UI Framework'}, {f:'Firebase', b:'Backend'}, {f:'Bloc', b:'State Mgmt'}].map(t => (
+                <div key={t.f} className="tech-pill-wrapper"><div className="tech-pill-inner"><div className="tech-front">{t.f}</div><div className="tech-back">{t.b}</div></div></div>
               ))}
             </div>
-            <div className="tech-row">
-              {['Flutter', 'Firebase', 'Dart', 'Bloc'].map(t => <span key={t} className="skill-pill">{t}</span>)}
-            </div>
-            <div className="proj-client">🚗 Client: Somnath Auto</div>
-          </div>
-          
-          <div className="proj-right">
-            <div className="mini-phone">
-              <div className="mini-notch"></div>
-              {/* Screen 1: Invoice List */}
-              <div className="mini-screen" style={{opacity: activeScreen === 0 ? 1 : 0}}>
-                <div style={{color:'#fff', fontSize:12, marginBottom:10}}>Invoices</div>
-                {[1,2,3,4].map(i => (
-                  <div key={i} style={{background:'rgba(255,255,255,0.05)', padding:8, borderRadius:8, marginBottom:8, display:'flex', justifyContent:'space-between'}}>
-                    <div style={{width:'50%', height:8, background:'rgba(255,255,255,0.2)', borderRadius:4}}></div>
-                    <div style={{width:'20%', height:8, background: i%2===0?'rgba(57,255,133,0.5)':'rgba(234,179,8,0.5)', borderRadius:4}}></div>
-                  </div>
-                ))}
-              </div>
-              {/* Screen 2: Analytics */}
-              <div className="mini-screen" style={{opacity: activeScreen === 1 ? 1 : 0}}>
-                <div style={{color:'#fff', fontSize:12, marginBottom:10}}>Analytics</div>
-                <div style={{height:100, display:'flex', alignItems:'flex-end', gap:5, paddingBottom:10, borderBottom:'1px solid rgba(255,255,255,0.1)'}}>
-                  {[40,80,60,100,50].map((h,i) => <div key={i} style={{flex:1, height:`${h}%`, background:'var(--primary-violet)', borderRadius:'4px 4px 0 0'}}></div>)}
-                </div>
-              </div>
-              {/* Screen 3: Customer */}
-              <div className="mini-screen" style={{opacity: activeScreen === 2 ? 1 : 0}}>
-                <div style={{display:'flex', alignItems:'center', gap:10, marginBottom:20}}>
-                  <div style={{width:30, height:30, borderRadius:'50%', background:'var(--light-lavender)'}}></div>
-                  <div style={{width:'60%', height:10, background:'rgba(255,255,255,0.2)', borderRadius:5}}></div>
-                </div>
-                {[1,2].map(i => <div key={i} style={{height:40, background:'rgba(255,255,255,0.05)', borderRadius:8, marginBottom:8}}></div>)}
-              </div>
-            </div>
           </div>
         </div>
       </section>
 
-      {/* --- EDUCATION SECTION --- */}
-      <section id="education" className="container reveal-section">
-        <div className="eyebrow">// knowledge base</div>
-        <h2 className="section-title orbitron">Education.json</h2>
-
-        <div className="diploma-wrapper">
-          <div className="diploma-card glass-card anti-gravity parallax-layer" style={{'--float-dur': '5.5s'}}>
-            <div className="shimmer"></div>
-            <svg className="constellation" viewBox="0 0 100 60" stroke="var(--primary-violet)" strokeWidth="1" fill="none">
-              <path d="M10,30 L30,10 L60,20 L80,50 L90,20" />
-              <circle cx="10" cy="30" r="3" fill="#fff" />
-              <circle cx="30" cy="10" r="3" fill="#fff" />
-              <circle cx="60" cy="20" r="3" fill="#fff" />
-              <circle cx="80" cy="50" r="3" fill="#fff" />
-              <circle cx="90" cy="20" r="3" fill="#fff" />
-            </svg>
-            <h3 className="deg-title orbitron">Bachelor of Computer Applications</h3>
-            <div className="col-name">Shri V.J. Modha College of I.T.</div>
-            <div className="edu-date">July 2024</div>
+      {/* PROJECTS */}
+      <section id="projects" className="container reveal">
+        <h2 className="section-title">Projects.apk</h2>
+        <div className="holo-card glass" style={{padding:40, display:'flex', gap:40}} 
+          onMouseMove={e => {
+            const rect = e.currentTarget.getBoundingClientRect();
+            const x = e.clientX - rect.left; const y = e.clientY - rect.top;
+            const angle = Math.atan2(y - rect.height/2, x - rect.width/2) * 180 / Math.PI;
+            e.currentTarget.style.setProperty('--grad-angle', `${angle}deg`);
+          }}>
+          <div className="holo-overlay"></div>
+          <div className="proj-left" style={{zIndex:2}}>
+            <h3 className="orbitron" style={{fontSize:32, color:'#fff', marginBottom:10}}>Invoice Flow</h3>
+            <div className="live-btn"><div className="live-dot"></div> Live Preview</div>
+            <p style={{color:'var(--text-muted)', margin:'20px 0', lineHeight:1.6}}>A full-featured enterprise billing system for automobile service businesses — real-time invoice generation, PDF invoice sharing via WhatsApp, and business analytics.</p>
+            <div style={{display:'flex', gap:10, flexWrap:'wrap', marginBottom:20}}>
+              {['Invoice Gen', 'PDF Sharing', 'WhatsApp', 'Analytics'].map(f => <div key={f} className="feat-tag glass" style={{padding:'6px 12px', fontSize:12, color:'#39FF85', border:'1px solid #39FF85'}}>{f}</div>)}
+            </div>
             
-            <div className="cgpa-val orbitron">7.56<span className="cgpa-max">/10</span></div>
-            <div className="cgpa-lbl">CGPA</div>
-            
-            <div className="cgpa-dots">
-              {[...Array(10)].map((_, i) => (
-                <div key={i} className={`cdot ${i < 8 ? 'filled' : 'empty'}`}></div>
-              ))}
+            {/* Screenshots strip */}
+            <div className="screenshot-strip">
+              {[1,2,3].map(i => <div key={i} className="ss-item"><div style={{height:'100%', background: i===1?'#3D1F8A':i===2?'#1A7A6E':'#0D2B2B', borderRadius:8}}></div></div>)}
             </div>
-
-            <div className="edu-tags">
-              <div className="skill-pill">Computer Science</div>
-              <div className="skill-pill">Problem Solving</div>
-              <div className="skill-pill">Software Engineering</div>
-            </div>
+          </div>
+          <div className="proj-right" style={{perspective:1000, zIndex:2}}>
+             <div className="phone-mockup mini-phone" style={{width: 200, height:400, transform: `rotateY(${phoneRot.x}deg) rotateX(${phoneRot.y}deg)`, filter:'drop-shadow(0 30px 60px var(--accent-glow))'}}>
+               <div className="phone-notch" style={{width:60, height:20}}></div>
+               <div className="phone-screen"><div style={{color:'#fff', marginTop:20, textAlign:'center'}}>Invoice Flow App</div></div>
+             </div>
           </div>
         </div>
       </section>
 
-      {/* --- CONTACT SECTION --- */}
-      <section id="contact" className="container reveal-section">
-        <div className="eyebrow">// open to opportunities</div>
-        <h2 className="section-title orbitron">Contact.init()</h2>
-
-        <div className="contact-row">
-          <a href="tel:9574896847" className="contact-pod glass-card anti-gravity parallax-layer" style={{'--float-dur': '4s', '--float-del': '0s'}}>
-            <div className="pod-icon">📞</div>
-            <div className="pod-lbl">Call Me</div>
-            <div className="pod-tooltip">9574896847</div>
-          </a>
+      {/* EDUCATION */}
+      <section id="education" className="container reveal">
+        <h2 className="section-title">Education.json</h2>
+        <div className="shimmer-card glass diploma-card" style={{maxWidth:600, margin:'0 auto', padding:40, textAlign:'center'}}>
+          <svg width="100" height="60" viewBox="0 0 100 60" style={{margin:'0 auto 20px'}}>
+            <path className="constellation-path" d="M10,30 L30,10 L60,20 L80,50 L90,20" fill="none" stroke="var(--accent)" strokeWidth="1"/>
+            {[ {x:10,y:30}, {x:30,y:10}, {x:60,y:20}, {x:80,y:50}, {x:90,y:20} ].map((p,i) => <circle key={i} cx={p.x} cy={p.y} r="3" fill="#fff"/>)}
+          </svg>
+          <h3 className="orbitron deg-title" style={{fontSize:24, color:'#fff'}}>Bachelor of Computer Applications</h3>
+          <div style={{color:'var(--text-muted)', margin:'10px 0'}}>📍 Shri V.J. Modha College of I.T., Gujarat</div>
           
-          <a href="mailto:udayjamariya12@gmail.com" className="contact-pod glass-card anti-gravity parallax-layer" style={{'--float-dur': '5.5s', '--float-del': '1s'}}>
-            <div className="pod-icon">✉</div>
-            <div className="pod-lbl">Email Me</div>
-            <div className="pod-tooltip">Copy Email</div>
-          </a>
+          <div className="orbitron cgpa-val" style={{fontSize:48, color:'var(--accent)', marginTop:20}}><Counter target={7.56} duration={2000}/> <span style={{fontSize:20, color:'var(--text-muted)'}}>/10</span></div>
+          <div style={{fontSize:12, letterSpacing:2, color:'var(--text-muted)'}}>CGPA</div>
           
-          <a href="https://linkedin.com/in/uday-jamariya" target="_blank" rel="noopener noreferrer" className="contact-pod glass-card anti-gravity parallax-layer" style={{'--float-dur': '3.8s', '--float-del': '0.5s'}}>
-            <div className="pod-icon">in</div>
-            <div className="pod-lbl">Connect</div>
-            <div className="pod-tooltip">View Profile</div>
-          </a>
-        </div>
-
-        <div className="open-banner glass-card">
-          <div className="ob-text">
-            "Currently open to Flutter Developer roles — freelance, internship, or full-time."
+          <div className="cgpa-dots" style={{display:'flex', justifyContent:'center', gap:8, marginTop:20}}>
+            {[...Array(10)].map((_, i) => <div key={i} className={`cgpa-dot ${i<8 ? 'filled' : ''}`} style={{animationDelay: `${i*150}ms`}}></div>)}
           </div>
-          <a href="mailto:udayjamariya12@gmail.com" className="ob-btn">
-            Initiate Contact <span className="arrow">→</span>
-          </a>
-        </div>
-
-        <div className="footer">
-          Built with React · Designed in Zero Gravity · Uday Jamariya © 2026
         </div>
       </section>
+
+      {/* CONTACT */}
+      <section id="contact" className="container reveal">
+        <h2 className="section-title">Contact.init()</h2>
+        <div className="contact-row" style={{display:'flex', justifyContent:'center', gap:40, marginBottom:40, flexWrap:'wrap'}}>
+          {[ {i:'📞', l:'Call Me', b:'+91 9574896847', h:'tel:9574896847'}, {i:'✉', l:'Email', b:'Click to email', h:'mailto:udayjamariya12@gmail.com'}, {i:'in', l:'Connect', b:'uday-jamariya', h:'https://linkedin.com/in/uday-jamariya'} ].map(p => (
+            <a key={p.l} href={p.h} target="_blank" className="pod-wrapper" style={{textDecoration:'none'}}>
+              <div className="pod-inner">
+                <div className="pod-front"><div style={{fontSize:32}}>{p.i}</div><div style={{fontSize:12, marginTop:5, color:'var(--text-primary)'}}>{p.l}</div></div>
+                <div className="pod-back">{p.b}</div>
+              </div>
+            </a>
+          ))}
+        </div>
+
+        <div className="glass open-banner" style={{maxWidth:800, margin:'0 auto', padding:40, textAlign:'center'}}>
+          <p className="ob-text" style={{fontSize:16, color:'#fff', marginBottom:30}}>"Currently open to Flutter Developer roles — freelance, internship, or full-time."</p>
+          <button className="btn-sweep transporter-btn" onClick={() => setFormOpen(!formOpen)}>
+            Initiate Contact →
+            <div className="beam"></div>
+          </button>
+          
+          <div className={`contact-form ${formOpen ? 'open' : ''}`}>
+            <input className="form-input" placeholder="Name" />
+            <input className="form-input" placeholder="Email" />
+            <textarea className="form-input" rows="4" placeholder="Message"></textarea>
+            <button className="btn-sweep" style={{width:'100%'}}>Send Transmission</button>
+          </div>
+
+          <div style={{marginTop:30, fontSize:14, color:'var(--text-muted)'}}>
+            Or reach me directly at <span style={{color:'var(--accent)', cursor:'pointer'}} onClick={copyEmail}>udayjamariya12@gmail.com</span>
+          </div>
+        </div>
+      </section>
+      
+      <div className={`toast ${toast ? 'show' : ''}`}>Copied! ✓</div>
+
+      <div style={{textAlign:'center', padding:30, color:'var(--text-muted)', fontSize:12, borderTop:'1px solid rgba(255,255,255,0.05)', marginTop: 50}}>
+        Built with React · Designed in Zero Gravity · Uday Jamariya © 2026
+      </div>
     </>
   );
 }
