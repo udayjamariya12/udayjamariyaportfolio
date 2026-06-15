@@ -18,7 +18,7 @@ const globalCSS = `
   /* Utilities */
   .glass { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(12px); border-radius: 20px; }
   .section-title { font-size: clamp(28px, 4vw, 48px); text-align: center; text-shadow: 0 0 30px var(--accent-glow); margin-bottom: 3rem; }
-  .eyebrow { color: var(--text-muted); font-family: monospace; text-align: left; margin-bottom: 0.5rem; font-size: 14px; }
+  .eyebrow { color: var(--text-muted); font-family: monospace; text-align: center; margin-bottom: 0.5rem; font-size: 14px; }
   
   /* Nebulas */
   .nebula { position: fixed; filter: blur(120px); border-radius: 50%; opacity: 0.12; pointer-events: none; z-index: -2; animation: nebPulse 8s infinite alternate; }
@@ -198,8 +198,8 @@ const globalCSS = `
     .hero { flex-direction: column; text-align: center; gap: 40px; padding-top: 100px; min-height: auto; }
     .hero-left, .hero-right { width: 100%; }
     .hero-title { font-size: clamp(36px, 10vw, 50px); line-height: 1.1; margin-bottom: 10px; }
-    .hero-subtitle { font-size: clamp(14px, 4vw, 16px); margin-bottom: 20px; }
-    .eyebrow { font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: center; margin-bottom: 10px; }
+    .hero-subtitle { font-size: clamp(14px, 4vw, 16px); }
+    .eyebrow { font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .stats-row { justify-content: center; gap: 15px; flex-wrap: wrap; }
     .hero-ctas { justify-content: center; flex-direction: column; width: 100%; gap: 15px; }
     .hero-ctas > * { width: 100%; text-align: center; }
@@ -286,9 +286,9 @@ function CustomCursor({ pos, hover }) {
   const [particles, setParticles] = useState([]);
   useEffect(() => {
     const click = e => {
-      const newP = Array.from({length: 8}).map((_, i) => {
+      const newP = Array.from({ length: 8 }).map((_, i) => {
         const angle = (i / 8) * Math.PI * 2;
-        return { id: Date.now() + i, x: e.clientX, y: e.clientY, tx: Math.cos(angle)*40, ty: Math.sin(angle)*40 };
+        return { id: Date.now() + i, x: e.clientX, y: e.clientY, tx: Math.cos(angle) * 40, ty: Math.sin(angle) * 40 };
       });
       setParticles(p => [...p, ...newP]);
       setTimeout(() => setParticles(p => p.filter(pt => !newP.includes(pt))), 400);
@@ -320,30 +320,30 @@ function Starfield() {
     resize();
 
     const stars = [
-      ...Array.from({length: 300}).map(() => ({ x: Math.random()*c.width, y: Math.random()*c.height, r: 0.5, s: 0.02, o: 0.4 })),
-      ...Array.from({length: 150}).map(() => ({ x: Math.random()*c.width, y: Math.random()*c.height, r: 1, s: 0.06, o: 0.7 })),
-      ...Array.from({length: 50}).map(() => ({ x: Math.random()*c.width, y: Math.random()*c.height, r: 1.5, s: 0.12, o: 1 }))
+      ...Array.from({ length: 300 }).map(() => ({ x: Math.random() * c.width, y: Math.random() * c.height, r: 0.5, s: 0.02, o: 0.4 })),
+      ...Array.from({ length: 150 }).map(() => ({ x: Math.random() * c.width, y: Math.random() * c.height, r: 1, s: 0.06, o: 0.7 })),
+      ...Array.from({ length: 50 }).map(() => ({ x: Math.random() * c.width, y: Math.random() * c.height, r: 1.5, s: 0.12, o: 1 }))
     ];
     let shootingStars = [];
 
     const draw = () => {
-      ctx.clearRect(0,0,c.width,c.height);
+      ctx.clearRect(0, 0, c.width, c.height);
       stars.forEach(st => {
         if (Math.random() < 0.001) st.twinkle = 60;
         let op = st.o;
         if (st.twinkle) { op = 1; st.twinkle--; }
         ctx.fillStyle = `rgba(255,255,255,${op})`;
-        ctx.beginPath(); ctx.arc(st.x, st.y, st.r, 0, Math.PI*2); ctx.fill();
+        ctx.beginPath(); ctx.arc(st.x, st.y, st.r, 0, Math.PI * 2); ctx.fill();
         st.y += st.s;
-        if (st.y > c.height) { st.y = 0; st.x = Math.random()*c.width; }
+        if (st.y > c.height) { st.y = 0; st.x = Math.random() * c.width; }
       });
 
       if (Math.random() < 0.005) {
-        shootingStars.push({ x: Math.random()*c.width, y: 0, life: 60, max: 60 });
+        shootingStars.push({ x: Math.random() * c.width, y: 0, life: 60, max: 60 });
       }
       shootingStars = shootingStars.filter(ss => ss.life > 0);
       shootingStars.forEach(ss => {
-        ctx.strokeStyle = `rgba(255,255,255,${Math.sin((ss.life/ss.max)*Math.PI)})`;
+        ctx.strokeStyle = `rgba(255,255,255,${Math.sin((ss.life / ss.max) * Math.PI)})`;
         ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(ss.x, ss.y); ctx.lineTo(ss.x - 80, ss.y + 80); ctx.stroke();
         ss.x -= 8; ss.y += 8; ss.life--;
       });
@@ -353,14 +353,14 @@ function Starfield() {
     draw();
     return () => { window.removeEventListener('resize', resize); cancelAnimationFrame(frame); }
   }, []);
-  return <canvas ref={canvasRef} id="starfield" style={{position:'fixed', top:0, left:0, zIndex:-3, pointerEvents:'none'}}></canvas>;
+  return <canvas ref={canvasRef} id="starfield" style={{ position: 'fixed', top: 0, left: 0, zIndex: -3, pointerEvents: 'none' }}></canvas>;
 }
 
 function useTypewriter(words) {
   const [text, setText] = useState('');
   const [wordIdx, setWordIdx] = useState(0);
   const [isDeleting, setIsDeleting] = useState(false);
-  
+
   useEffect(() => {
     const current = words[wordIdx];
     let timeout;
@@ -383,9 +383,9 @@ function Counter({ target, duration }) {
 
   useEffect(() => {
     const ob = new IntersectionObserver(e => {
-      if(e[0].isIntersecting) setStarted(true);
+      if (e[0].isIntersecting) setStarted(true);
     });
-    if(ref.current) ob.observe(ref.current);
+    if (ref.current) ob.observe(ref.current);
     return () => ob.disconnect();
   }, []);
 
@@ -403,7 +403,7 @@ function Counter({ target, duration }) {
     frame = requestAnimationFrame(update);
     return () => cancelAnimationFrame(frame);
   }, [target, duration, started]);
-  
+
   const display = target % 1 === 0 ? Math.floor(count) : count.toFixed(2);
   return <span ref={ref}>{display}</span>;
 }
@@ -440,9 +440,9 @@ export default function App() {
       const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
       const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
       setScrollP((winScroll / height) * 100);
-      
+
       const sections = ['hero', 'skills', 'experience', 'projects', 'education', 'contact'];
-      for(let s of sections) {
+      for (let s of sections) {
         const el = document.getElementById(s);
         if (el && window.scrollY >= el.offsetTop - 300) setActiveSec(s);
       }
@@ -453,10 +453,10 @@ export default function App() {
 
   const typeTextHero = useTypewriter(["Flutter Developer", "Mobile Engineer", "Clean Arch Advocate", "Dart Specialist"]);
   const typeTextExp = useTypewriter(["Mission: Invoice Flow Enterprise Billing"]);
-  
+
   const [screenIdx, setScreenIdx] = useState(0);
   useEffect(() => {
-    const i = setInterval(() => setScreenIdx(p => (p+1)%3), 3000);
+    const i = setInterval(() => setScreenIdx(p => (p + 1) % 3), 3000);
     return () => clearInterval(i);
   }, []);
 
@@ -501,14 +501,14 @@ export default function App() {
   };
 
   const phoneRef = useRef(null);
-  const [phoneRot, setPhoneRot] = useState({x:0, y:0});
+  const [phoneRot, setPhoneRot] = useState({ x: 0, y: 0 });
   useEffect(() => {
     if (!phoneRef.current) return;
     const rect = phoneRef.current.getBoundingClientRect();
-    const cx = rect.left + rect.width/2;
-    const cy = rect.top + rect.height/2;
-    const dx = (pos.x - cx) / (window.innerWidth/2);
-    const dy = (pos.y - cy) / (window.innerHeight/2);
+    const cx = rect.left + rect.width / 2;
+    const cy = rect.top + rect.height / 2;
+    const dx = (pos.x - cx) / (window.innerWidth / 2);
+    const dy = (pos.y - cy) / (window.innerHeight / 2);
     setPhoneRot({ x: -dy * 4, y: dx * 8 });
   }, [pos]);
 
@@ -517,18 +517,18 @@ export default function App() {
       <CustomCursor pos={pos} hover={hover} />
       <Starfield />
       <div className="nebula neb-1"></div><div className="nebula neb-2"></div><div className="nebula neb-3"></div>
-      
+
       <div id="progress-bar" style={{ width: `${scrollP}%` }}></div>
-      
+
       <div className="spy-dots">
         {['hero', 'skills', 'experience', 'projects', 'education', 'contact'].map(s => (
-          <div key={s} className={`spy-dot ${activeSec === s ? 'active' : ''}`} onClick={() => document.getElementById(s).scrollIntoView({behavior:'smooth'})}>
+          <div key={s} className={`spy-dot ${activeSec === s ? 'active' : ''}`} onClick={() => document.getElementById(s).scrollIntoView({ behavior: 'smooth' })}>
             <div className="spy-tooltip">{s.charAt(0).toUpperCase() + s.slice(1)}</div>
           </div>
         ))}
       </div>
 
-      <button className={`rocket-btn glass ${scrollP > 10 ? 'visible' : ''}`} onClick={(e) => { e.currentTarget.classList.add('shake'); setTimeout(() => e.currentTarget.classList.remove('shake'), 500); window.scrollTo({top:0, behavior:'smooth'}); }}>🚀</button>
+      <button className={`rocket-btn glass ${scrollP > 10 ? 'visible' : ''}`} onClick={(e) => { e.currentTarget.classList.add('shake'); setTimeout(() => e.currentTarget.classList.remove('shake'), 500); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>🚀</button>
 
       <button className="theme-btn glass" onClick={() => {
         const keys = Object.keys(THEMES);
@@ -541,14 +541,14 @@ export default function App() {
       <section id="hero" className="container reveal">
         <div className="hero">
           <div className="hero-left">
-            <h1 className="hero-title glitch">Uday<br/>Jamariya</h1>
-            <div className="eyebrow">&lt; {typeTextHero} <span style={{animation:'blink 1s step-end infinite'}}>|</span> /&gt;</div>
+            <div className="eyebrow" style={{ textAlign: 'left' }}>&lt; {typeTextHero} <span style={{ animation: 'blink 1s step-end infinite' }}>|</span> /&gt;</div>
+            <h1 className="hero-title glitch">Uday<br />Jamariya</h1>
             <p className="hero-subtitle">Cross-Platform · Clean Architecture</p>
-            
+
             <div className="stats-row">
-              <div className="stat-item"><div className="stat-num"><Counter target={1} duration={1000}/></div><div className="stat-lbl">App Shipped</div></div>
-              <div className="stat-item"><div className="stat-num"><Counter target={6} duration={1500}/></div><div className="stat-lbl">Months Exp</div></div>
-              <div className="stat-item"><div className="stat-num"><Counter target={5} duration={1200}/>+</div><div className="stat-lbl">Technologies</div></div>
+              <div className="stat-item"><div className="stat-num"><Counter target={1} duration={1000} /></div><div className="stat-lbl">App Shipped</div></div>
+              <div className="stat-item"><div className="stat-num"><Counter target={6} duration={1500} /></div><div className="stat-lbl">Months Exp</div></div>
+              <div className="stat-item"><div className="stat-num"><Counter target={5} duration={1200} />+</div><div className="stat-lbl">Technologies</div></div>
             </div>
 
             <div className="hero-ctas">
@@ -556,44 +556,44 @@ export default function App() {
               <a href="#contact" className="btn-outline">Contact Me</a>
             </div>
           </div>
-          
+
           <div className="hero-right">
             <div className="phone-3d-wrapper" style={{ transform: `rotateX(${phoneRot.x}deg) rotateY(${phoneRot.y}deg)` }}>
               <div className="phone-mockup" ref={phoneRef}>
                 <div className="phone-notch"></div>
-                
+
                 {/* Screens */}
-                <div className="phone-screen" style={{opacity: screenIdx===0?1:0, zIndex: screenIdx===0?2:1}}>
-                  <div style={{display:'flex', justifyContent:'space-between', color:'#fff', fontWeight:600}}>Invoice Flow <span>🔔</span></div>
-                  <div style={{display:'flex', gap:5}}>
-                    <div style={{flex:1, background:'var(--accent)', padding:10, borderRadius:8, textAlign:'center'}}><div style={{fontWeight:'bold'}}>24</div><div style={{fontSize:9}}>Invs</div></div>
-                    <div style={{flex:1, background:'#1A7A6E', padding:10, borderRadius:8, textAlign:'center'}}><div style={{fontWeight:'bold', color:'#fff'}}>18</div><div style={{fontSize:9, color:'#fff'}}>Clients</div></div>
-                    <div style={{flex:1, background:'#3D1F8A', padding:10, borderRadius:8, textAlign:'center'}}><div style={{fontWeight:'bold', color:'#fff'}}>₹1.2L</div><div style={{fontSize:9, color:'#fff'}}>Rev</div></div>
+                <div className="phone-screen" style={{ opacity: screenIdx === 0 ? 1 : 0, zIndex: screenIdx === 0 ? 2 : 1 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', color: '#fff', fontWeight: 600 }}>Invoice Flow <span>🔔</span></div>
+                  <div style={{ display: 'flex', gap: 5 }}>
+                    <div style={{ flex: 1, background: 'var(--accent)', padding: 10, borderRadius: 8, textAlign: 'center' }}><div style={{ fontWeight: 'bold' }}>24</div><div style={{ fontSize: 9 }}>Invs</div></div>
+                    <div style={{ flex: 1, background: '#1A7A6E', padding: 10, borderRadius: 8, textAlign: 'center' }}><div style={{ fontWeight: 'bold', color: '#fff' }}>18</div><div style={{ fontSize: 9, color: '#fff' }}>Clients</div></div>
+                    <div style={{ flex: 1, background: '#3D1F8A', padding: 10, borderRadius: 8, textAlign: 'center' }}><div style={{ fontWeight: 'bold', color: '#fff' }}>₹1.2L</div><div style={{ fontSize: 9, color: '#fff' }}>Rev</div></div>
                   </div>
-                  <div style={{fontSize:12, color:'#fff', display:'flex', justifyContent:'space-between'}}>Recent <span style={{color:'#39FF85'}}>View All</span></div>
-                  {[['Ramesh', 'Paid', '#39FF85'],['Patel', 'Pending', '#eab308'],['Shah', 'Due', '#ef4444']].map(r => (
-                    <div key={r[0]} style={{display:'flex', justifyContent:'space-between', padding:8, background:'rgba(255,255,255,0.05)', borderRadius:8}}>
-                      <div style={{fontSize:11, color:'#fff'}}>{r[0]}</div><div style={{fontSize:9, padding:'2px 6px', borderRadius:10, border:`1px solid ${r[2]}`, color:r[2]}}>{r[1]}</div>
+                  <div style={{ fontSize: 12, color: '#fff', display: 'flex', justifyContent: 'space-between' }}>Recent <span style={{ color: '#39FF85' }}>View All</span></div>
+                  {[['Ramesh', 'Paid', '#39FF85'], ['Patel', 'Pending', '#eab308'], ['Shah', 'Due', '#ef4444']].map(r => (
+                    <div key={r[0]} style={{ display: 'flex', justifyContent: 'space-between', padding: 8, background: 'rgba(255,255,255,0.05)', borderRadius: 8 }}>
+                      <div style={{ fontSize: 11, color: '#fff' }}>{r[0]}</div><div style={{ fontSize: 9, padding: '2px 6px', borderRadius: 10, border: `1px solid ${r[2]}`, color: r[2] }}>{r[1]}</div>
                     </div>
                   ))}
-                  <div style={{position:'absolute', bottom:10, left:10, right:10, height:50, background:'rgba(255,255,255,0.1)', borderRadius:25, display:'flex', justifyContent:'space-around', alignItems:'center'}}>
-                    <div style={{width:20,height:20, borderRadius:'50%', background:'var(--accent)'}}></div>
-                    <div style={{width:20,height:20, borderRadius:'50%', background:'rgba(255,255,255,0.3)'}}></div>
-                    <div style={{width:20,height:20, borderRadius:'50%', background:'rgba(255,255,255,0.3)'}}></div>
+                  <div style={{ position: 'absolute', bottom: 10, left: 10, right: 10, height: 50, background: 'rgba(255,255,255,0.1)', borderRadius: 25, display: 'flex', justifyContent: 'space-around', alignItems: 'center' }}>
+                    <div style={{ width: 20, height: 20, borderRadius: '50%', background: 'var(--accent)' }}></div>
+                    <div style={{ width: 20, height: 20, borderRadius: '50%', background: 'rgba(255,255,255,0.3)' }}></div>
+                    <div style={{ width: 20, height: 20, borderRadius: '50%', background: 'rgba(255,255,255,0.3)' }}></div>
                   </div>
                 </div>
 
-                <div className="phone-screen" style={{opacity: screenIdx===1?1:0, background:'#0F0F20', zIndex: screenIdx===1?2:1}}>
-                   <div style={{color:'#fff', fontWeight:600}}>All Invoices</div>
-                   {[1,2,3,4,5].map(i => <div key={i} style={{height:40, background:i%2===0?'rgba(255,255,255,0.03)':'transparent', borderRadius:4}}></div>)}
+                <div className="phone-screen" style={{ opacity: screenIdx === 1 ? 1 : 0, background: '#0F0F20', zIndex: screenIdx === 1 ? 2 : 1 }}>
+                  <div style={{ color: '#fff', fontWeight: 600 }}>All Invoices</div>
+                  {[1, 2, 3, 4, 5].map(i => <div key={i} style={{ height: 40, background: i % 2 === 0 ? 'rgba(255,255,255,0.03)' : 'transparent', borderRadius: 4 }}></div>)}
                 </div>
 
-                <div className="phone-screen" style={{opacity: screenIdx===2?1:0, zIndex: screenIdx===2?2:1}}>
-                  <div style={{color:'#fff', fontWeight:600}}>Analytics</div>
-                  <div style={{height:150, display:'flex', alignItems:'flex-end', gap:10, borderBottom:'1px solid rgba(255,255,255,0.2)'}}>
-                    <div style={{flex:1, height:'40%', background:'var(--accent)'}}></div>
-                    <div style={{flex:1, height:'70%', background:'#1A7A6E'}}></div>
-                    <div style={{flex:1, height:'50%', background:'#3D1F8A'}}></div>
+                <div className="phone-screen" style={{ opacity: screenIdx === 2 ? 1 : 0, zIndex: screenIdx === 2 ? 2 : 1 }}>
+                  <div style={{ color: '#fff', fontWeight: 600 }}>Analytics</div>
+                  <div style={{ height: 150, display: 'flex', alignItems: 'flex-end', gap: 10, borderBottom: '1px solid rgba(255,255,255,0.2)' }}>
+                    <div style={{ flex: 1, height: '40%', background: 'var(--accent)' }}></div>
+                    <div style={{ flex: 1, height: '70%', background: '#1A7A6E' }}></div>
+                    <div style={{ flex: 1, height: '50%', background: '#3D1F8A' }}></div>
                   </div>
                 </div>
 
@@ -601,8 +601,8 @@ export default function App() {
             </div>
 
             {/* Satellites */}
-            {[{t:'Container()', dur:'8s', y:200, d:0}, {t:'Scaffold()', dur:'12s', y:100, d:-2}, {t:'Bloc()', dur:'10s', y:-50, d:-4}, {t:'Firebase', dur:'15s', y:-150, d:-1}, {t:'GetX()', dur:'9s', y:50, d:-3}].map((s,i) => (
-              <div key={i} className="orbit-satellite" style={{animationDuration: s.dur, animationDelay: `${s.d}s`, top: '50%', marginTop: `${s.y}px` }}>{s.t}</div>
+            {[{ t: 'Container()', dur: '8s', y: 200, d: 0 }, { t: 'Scaffold()', dur: '12s', y: 100, d: -2 }, { t: 'Bloc()', dur: '10s', y: -50, d: -4 }, { t: 'Firebase', dur: '15s', y: -150, d: -1 }, { t: 'GetX()', dur: '9s', y: 50, d: -3 }].map((s, i) => (
+              <div key={i} className="orbit-satellite" style={{ animationDuration: s.dur, animationDelay: `${s.d}s`, top: '50%', marginTop: `${s.y}px` }}>{s.t}</div>
             ))}
           </div>
         </div>
@@ -613,23 +613,23 @@ export default function App() {
         <h2 className="section-title">Skills.dart</h2>
         <div className="solar-system">
           <div className="sun">Flutter</div>
-          <div className="orbit-ring ring-inner" style={{'--dur':'20s'}}>
-            <div className="planet-container" style={{'--angle': 0, '--radius': '150px'}}><div className="planet" style={{'--dur':'20s'}}>Dart<div className="p-tooltip">Core Language</div></div></div>
-            <div className="planet-container" style={{'--angle': 120, '--radius': '150px'}}><div className="planet" style={{'--dur':'20s'}}>Bloc<div className="p-tooltip">State Mgmt</div></div></div>
-            <div className="planet-container" style={{'--angle': 240, '--radius': '150px'}}><div className="planet" style={{'--dur':'20s'}}>Firebase<div className="p-tooltip">Backend</div></div></div>
+          <div className="orbit-ring ring-inner" style={{ '--dur': '20s' }}>
+            <div className="planet-container" style={{ '--angle': 0, '--radius': '150px' }}><div className="planet" style={{ '--dur': '20s' }}>Dart<div className="p-tooltip">Core Language</div></div></div>
+            <div className="planet-container" style={{ '--angle': 120, '--radius': '150px' }}><div className="planet" style={{ '--dur': '20s' }}>Bloc<div className="p-tooltip">State Mgmt</div></div></div>
+            <div className="planet-container" style={{ '--angle': 240, '--radius': '150px' }}><div className="planet" style={{ '--dur': '20s' }}>Firebase<div className="p-tooltip">Backend</div></div></div>
           </div>
-          <div className="orbit-ring ring-outer" style={{'--dur':'35s'}}>
-            {[ {t:'GetX',a:0}, {t:'Provider',a:72}, {t:'REST',a:144}, {t:'SQLite',a:216}, {t:'Material',a:288} ].map(p => (
-              <div key={p.t} className="planet-container" style={{'--angle': p.a, '--radius': '250px'}}><div className="planet" style={{'--dur':'35s'}}>{p.t}</div></div>
+          <div className="orbit-ring ring-outer" style={{ '--dur': '35s' }}>
+            {[{ t: 'GetX', a: 0 }, { t: 'Provider', a: 72 }, { t: 'REST', a: 144 }, { t: 'SQLite', a: 216 }, { t: 'Material', a: 288 }].map(p => (
+              <div key={p.t} className="planet-container" style={{ '--angle': p.a, '--radius': '250px' }}><div className="planet" style={{ '--dur': '35s' }}>{p.t}</div></div>
             ))}
           </div>
-          <div className="asteroid" style={{top:'10%', left:'20%', '--del':'0s'}}>HTML / CSS</div>
-          <div className="asteroid" style={{top:'80%', left:'80%', '--del':'1s'}}>Git</div>
-          <div className="asteroid" style={{top:'20%', right:'10%', '--del':'2s'}}>App Store</div>
+          <div className="asteroid" style={{ top: '10%', left: '20%', '--del': '0s' }}>HTML / CSS</div>
+          <div className="asteroid" style={{ top: '80%', left: '80%', '--del': '1s' }}>Git</div>
+          <div className="asteroid" style={{ top: '20%', right: '10%', '--del': '2s' }}>App Store</div>
         </div>
-        <div className="mobile-skills glass" style={{padding:20}}>
-          <div style={{color:'var(--accent)', fontWeight:'bold', marginBottom:10}}>Core Expertise:</div>
-          <div style={{display:'flex', gap:10, flexWrap:'wrap'}}>{['Flutter', 'Dart', 'Bloc', 'Firebase', 'GetX', 'REST API'].map(s => <div key={s} style={{padding:'6px 12px', border:'1px solid var(--accent)', borderRadius:20, fontSize:12}}>{s}</div>)}</div>
+        <div className="mobile-skills glass" style={{ padding: 20 }}>
+          <div style={{ color: 'var(--accent)', fontWeight: 'bold', marginBottom: 10 }}>Core Expertise:</div>
+          <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>{['Flutter', 'Dart', 'Bloc', 'Firebase', 'GetX', 'REST API'].map(s => <div key={s} style={{ padding: '6px 12px', border: '1px solid var(--accent)', borderRadius: 20, fontSize: 12 }}>{s}</div>)}</div>
         </div>
       </section>
 
@@ -640,12 +640,12 @@ export default function App() {
           <div className="timeline" id="exp-timeline"><div className="timeline-dot"></div></div>
           <div className="mission-card glass" id="exp-card">
             <div className="scanline"></div>
-            <div style={{color:'var(--text-muted)', fontSize:12, marginBottom:10}}>DEC 2025 – MAY 2026</div>
-            <h3 style={{color:'#fff', fontSize:20, marginBottom:5}}>Excel PTP – Unit of Amar Infotech</h3>
-            <div style={{color:'var(--accent)', fontSize:16, marginBottom:20, fontFamily:'monospace'}}>&gt; {typeTextExp}</div>
-            <p style={{color:'var(--text-muted)', fontSize:14, lineHeight:1.6, marginBottom:20}}>Engineered a real-world enterprise billing and expense tracking application for an automobile service business using Flutter and Firebase...</p>
-            <div style={{display:'flex', gap:10, flexWrap:'wrap'}}>
-              {[{f:'Flutter', b:'UI Framework'}, {f:'Firebase', b:'Backend'}, {f:'Bloc', b:'State Mgmt'}].map(t => (
+            <div style={{ color: 'var(--text-muted)', fontSize: 12, marginBottom: 10 }}>DEC 2025 – MAY 2026</div>
+            <h3 style={{ color: '#fff', fontSize: 20, marginBottom: 5 }}>Excel PTP – Unit of Amar Infotech</h3>
+            <div style={{ color: 'var(--accent)', fontSize: 16, marginBottom: 20, fontFamily: 'monospace' }}>&gt; {typeTextExp}</div>
+            <p style={{ color: 'var(--text-muted)', fontSize: 14, lineHeight: 1.6, marginBottom: 20 }}>Engineered a real-world enterprise billing and expense tracking application for an automobile service business using Flutter and Firebase...</p>
+            <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+              {[{ f: 'Flutter', b: 'UI Framework' }, { f: 'Firebase', b: 'Backend' }, { f: 'Bloc', b: 'State Mgmt' }].map(t => (
                 <div key={t.f} className="tech-pill-wrapper"><div className="tech-pill-inner"><div className="tech-front">{t.f}</div><div className="tech-back">{t.b}</div></div></div>
               ))}
             </div>
@@ -657,136 +657,136 @@ export default function App() {
       <section id="projects" className="container reveal">
         <h2 className="section-title">Projects.apk</h2>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '40px' }}>
-          <div className="holo-card glass" style={{padding:40, display:'flex', gap:40}} 
+          <div className="holo-card glass" style={{ padding: 40, display: 'flex', gap: 40 }}
             onMouseMove={e => {
               const rect = e.currentTarget.getBoundingClientRect();
               const x = e.clientX - rect.left; const y = e.clientY - rect.top;
-              const angle = Math.atan2(y - rect.height/2, x - rect.width/2) * 180 / Math.PI;
+              const angle = Math.atan2(y - rect.height / 2, x - rect.width / 2) * 180 / Math.PI;
               e.currentTarget.style.setProperty('--grad-angle', `${angle}deg`);
             }}>
             <div className="holo-overlay"></div>
-            <div className="proj-left" style={{zIndex:2}}>
-              <h3 className="orbitron" style={{fontSize:32, color:'#fff', marginBottom:10}}>Invoice Flow</h3>
+            <div className="proj-left" style={{ zIndex: 2 }}>
+              <h3 className="orbitron" style={{ fontSize: 32, color: '#fff', marginBottom: 10 }}>Invoice Flow</h3>
               <div className="live-btn"><div className="live-dot"></div> Live Preview</div>
-              <p style={{color:'var(--text-muted)', margin:'20px 0', lineHeight:1.6}}>A full-featured enterprise billing system for automobile service businesses — real-time invoice generation, PDF invoice sharing via WhatsApp, and business analytics.</p>
-              <div style={{display:'flex', gap:10, flexWrap:'wrap', marginBottom:20}}>
-                {['Invoice Gen', 'PDF Sharing', 'WhatsApp', 'Analytics'].map(f => <div key={f} className="feat-tag glass" style={{padding:'6px 12px', fontSize:12, color:'#39FF85', border:'1px solid #39FF85'}}>{f}</div>)}
+              <p style={{ color: 'var(--text-muted)', margin: '20px 0', lineHeight: 1.6 }}>A full-featured enterprise billing system for automobile service businesses — real-time invoice generation, PDF invoice sharing via WhatsApp, and business analytics.</p>
+              <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 20 }}>
+                {['Invoice Gen', 'PDF Sharing', 'WhatsApp', 'Analytics'].map(f => <div key={f} className="feat-tag glass" style={{ padding: '6px 12px', fontSize: 12, color: '#39FF85', border: '1px solid #39FF85' }}>{f}</div>)}
               </div>
-              
+
               {/* Screenshots strip */}
               <div className="screenshot-strip">
-                <div className="ss-item" style={{display:'flex', flexDirection:'column', gap:5, background:'#0F0F20'}}>
-                  <div style={{height:20, background:'rgba(255,255,255,0.1)', borderRadius:4}}></div>
-                  <div style={{flex:1, display:'flex', alignItems:'flex-end', gap:4}}>
-                    <div style={{flex:1, height:'40%', background:'var(--accent)', borderRadius:'2px 2px 0 0'}}></div>
-                    <div style={{flex:1, height:'70%', background:'#1A7A6E', borderRadius:'2px 2px 0 0'}}></div>
-                    <div style={{flex:1, height:'50%', background:'#3D1F8A', borderRadius:'2px 2px 0 0'}}></div>
+                <div className="ss-item" style={{ display: 'flex', flexDirection: 'column', gap: 5, background: '#0F0F20' }}>
+                  <div style={{ height: 20, background: 'rgba(255,255,255,0.1)', borderRadius: 4 }}></div>
+                  <div style={{ flex: 1, display: 'flex', alignItems: 'flex-end', gap: 4 }}>
+                    <div style={{ flex: 1, height: '40%', background: 'var(--accent)', borderRadius: '2px 2px 0 0' }}></div>
+                    <div style={{ flex: 1, height: '70%', background: '#1A7A6E', borderRadius: '2px 2px 0 0' }}></div>
+                    <div style={{ flex: 1, height: '50%', background: '#3D1F8A', borderRadius: '2px 2px 0 0' }}></div>
                   </div>
                 </div>
-                <div className="ss-item" style={{display:'flex', flexDirection:'column', gap:5, background:'#0F0F20'}}>
-                  <div style={{height:10, width:'50%', background:'var(--text-muted)', borderRadius:2}}></div>
-                  {[1,2,3,4].map(i => <div key={i} style={{height:15, background:'rgba(255,255,255,0.05)', borderRadius:4}}></div>)}
+                <div className="ss-item" style={{ display: 'flex', flexDirection: 'column', gap: 5, background: '#0F0F20' }}>
+                  <div style={{ height: 10, width: '50%', background: 'var(--text-muted)', borderRadius: 2 }}></div>
+                  {[1, 2, 3, 4].map(i => <div key={i} style={{ height: 15, background: 'rgba(255,255,255,0.05)', borderRadius: 4 }}></div>)}
                 </div>
-                <div className="ss-item" style={{display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', background:'#0F0F20'}}>
-                  <div style={{width:40, height:50, background:'#fff', borderRadius:2, position:'relative'}}>
-                    <div style={{position:'absolute', top:5, left:5, width:15, height:15, background:'#ef4444', borderRadius:2}}></div>
-                    <div style={{position:'absolute', top:25, left:5, right:5, height:2, background:'#ccc'}}></div>
-                    <div style={{position:'absolute', top:30, left:5, right:15, height:2, background:'#ccc'}}></div>
+                <div className="ss-item" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: '#0F0F20' }}>
+                  <div style={{ width: 40, height: 50, background: '#fff', borderRadius: 2, position: 'relative' }}>
+                    <div style={{ position: 'absolute', top: 5, left: 5, width: 15, height: 15, background: '#ef4444', borderRadius: 2 }}></div>
+                    <div style={{ position: 'absolute', top: 25, left: 5, right: 5, height: 2, background: '#ccc' }}></div>
+                    <div style={{ position: 'absolute', top: 30, left: 5, right: 15, height: 2, background: '#ccc' }}></div>
                   </div>
                 </div>
               </div>
             </div>
-            <div className="proj-right" style={{perspective:1000, zIndex:2}}>
-               <div className="phone-mockup mini-phone" style={{width: 200, height:400, transform: `rotateY(${phoneRot.x}deg) rotateX(${phoneRot.y}deg)`, filter:'drop-shadow(0 30px 60px var(--accent-glow))'}}>
-                 <div className="phone-notch" style={{width:60, height:20}}></div>
-                 <div className="phone-screen" style={{padding: '30px 10px 10px', background: '#0A0A1E', display: 'block'}}>
-                   <div style={{color:'#fff', fontWeight:600, fontSize:14}}>Invoice Flow</div>
-                   <div style={{display:'flex', gap:5, marginTop:10}}>
-                     <div style={{flex:1, background:'var(--accent)', padding:5, borderRadius:4, textAlign:'center'}}><div style={{fontWeight:'bold', fontSize:12, color:'#fff'}}>24</div><div style={{fontSize:8, color:'#fff'}}>Invs</div></div>
-                     <div style={{flex:1, background:'#1A7A6E', padding:5, borderRadius:4, textAlign:'center'}}><div style={{fontWeight:'bold', color:'#fff', fontSize:12}}>18</div><div style={{fontSize:8, color:'#fff'}}>Clients</div></div>
-                   </div>
-                   <div style={{fontSize:10, color:'#fff', marginTop:15, marginBottom:5}}>Recent Activity</div>
-                   {[['Ramesh', '#39FF85'],['Patel', '#eab308'],['Shah', '#ef4444']].map((r, idx) => (
-                     <div key={idx} style={{display:'flex', justifyContent:'space-between', alignItems:'center', padding:6, background:'rgba(255,255,255,0.05)', borderRadius:4, marginTop:4}}>
-                       <div style={{fontSize:9, color:'#fff'}}>{r[0]}</div>
-                       <div style={{width:6, height:6, borderRadius:'50%', background:r[1]}}></div>
-                     </div>
-                   ))}
-                   <div style={{position:'absolute', bottom:10, left:10, right:10, height:40, background:'rgba(255,255,255,0.1)', borderRadius:20, display:'flex', justifyContent:'space-around', alignItems:'center'}}>
-                     <div style={{width:16,height:16, borderRadius:'50%', background:'var(--accent)'}}></div>
-                     <div style={{width:16,height:16, borderRadius:'50%', background:'rgba(255,255,255,0.3)'}}></div>
-                     <div style={{width:16,height:16, borderRadius:'50%', background:'rgba(255,255,255,0.3)'}}></div>
-                   </div>
-                 </div>
-               </div>
+            <div className="proj-right" style={{ perspective: 1000, zIndex: 2 }}>
+              <div className="phone-mockup mini-phone" style={{ width: 200, height: 400, transform: `rotateY(${phoneRot.x}deg) rotateX(${phoneRot.y}deg)`, filter: 'drop-shadow(0 30px 60px var(--accent-glow))' }}>
+                <div className="phone-notch" style={{ width: 60, height: 20 }}></div>
+                <div className="phone-screen" style={{ padding: '30px 10px 10px', background: '#0A0A1E', display: 'block' }}>
+                  <div style={{ color: '#fff', fontWeight: 600, fontSize: 14 }}>Invoice Flow</div>
+                  <div style={{ display: 'flex', gap: 5, marginTop: 10 }}>
+                    <div style={{ flex: 1, background: 'var(--accent)', padding: 5, borderRadius: 4, textAlign: 'center' }}><div style={{ fontWeight: 'bold', fontSize: 12, color: '#fff' }}>24</div><div style={{ fontSize: 8, color: '#fff' }}>Invs</div></div>
+                    <div style={{ flex: 1, background: '#1A7A6E', padding: 5, borderRadius: 4, textAlign: 'center' }}><div style={{ fontWeight: 'bold', color: '#fff', fontSize: 12 }}>18</div><div style={{ fontSize: 8, color: '#fff' }}>Clients</div></div>
+                  </div>
+                  <div style={{ fontSize: 10, color: '#fff', marginTop: 15, marginBottom: 5 }}>Recent Activity</div>
+                  {[['Ramesh', '#39FF85'], ['Patel', '#eab308'], ['Shah', '#ef4444']].map((r, idx) => (
+                    <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: 6, background: 'rgba(255,255,255,0.05)', borderRadius: 4, marginTop: 4 }}>
+                      <div style={{ fontSize: 9, color: '#fff' }}>{r[0]}</div>
+                      <div style={{ width: 6, height: 6, borderRadius: '50%', background: r[1] }}></div>
+                    </div>
+                  ))}
+                  <div style={{ position: 'absolute', bottom: 10, left: 10, right: 10, height: 40, background: 'rgba(255,255,255,0.1)', borderRadius: 20, display: 'flex', justifyContent: 'space-around', alignItems: 'center' }}>
+                    <div style={{ width: 16, height: 16, borderRadius: '50%', background: 'var(--accent)' }}></div>
+                    <div style={{ width: 16, height: 16, borderRadius: '50%', background: 'rgba(255,255,255,0.3)' }}></div>
+                    <div style={{ width: 16, height: 16, borderRadius: '50%', background: 'rgba(255,255,255,0.3)' }}></div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 
-          <div className="holo-card glass" style={{padding:40, display:'flex', gap:40}} 
+          <div className="holo-card glass" style={{ padding: 40, display: 'flex', gap: 40 }}
             onMouseMove={e => {
               const rect = e.currentTarget.getBoundingClientRect();
               const x = e.clientX - rect.left; const y = e.clientY - rect.top;
-              const angle = Math.atan2(y - rect.height/2, x - rect.width/2) * 180 / Math.PI;
+              const angle = Math.atan2(y - rect.height / 2, x - rect.width / 2) * 180 / Math.PI;
               e.currentTarget.style.setProperty('--grad-angle', `${angle}deg`);
             }}>
             <div className="holo-overlay"></div>
-            <div className="proj-left" style={{zIndex:2}}>
-              <h3 className="orbitron" style={{fontSize:32, color:'#fff', marginBottom:10}}>ServeEas</h3>
+            <div className="proj-left" style={{ zIndex: 2 }}>
+              <h3 className="orbitron" style={{ fontSize: 32, color: '#fff', marginBottom: 10 }}>ServeEas</h3>
               <div className="live-btn"><div className="live-dot"></div> Live Preview</div>
-              <p style={{color:'var(--text-muted)', margin:'20px 0', lineHeight:1.6}}>A comprehensive service booking platform enabling seamless user interactions, service provider management, and easy scheduling.</p>
-              <div style={{display:'flex', gap:10, flexWrap:'wrap', marginBottom:20}}>
-                {['Service Booking', 'Provider Mgmt', 'Scheduling', 'Payments'].map(f => <div key={f} className="feat-tag glass" style={{padding:'6px 12px', fontSize:12, color:'#39FF85', border:'1px solid #39FF85'}}>{f}</div>)}
+              <p style={{ color: 'var(--text-muted)', margin: '20px 0', lineHeight: 1.6 }}>A comprehensive service booking platform enabling seamless user interactions, service provider management, and easy scheduling.</p>
+              <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 20 }}>
+                {['Service Booking', 'Provider Mgmt', 'Scheduling', 'Payments'].map(f => <div key={f} className="feat-tag glass" style={{ padding: '6px 12px', fontSize: 12, color: '#39FF85', border: '1px solid #39FF85' }}>{f}</div>)}
               </div>
-              
+
               {/* Screenshots strip */}
               <div className="screenshot-strip">
-                <div className="ss-item" style={{display:'flex', flexDirection:'column', gap:5, background:'#0F0F20'}}>
-                  <div style={{height:20, background:'rgba(255,255,255,0.1)', borderRadius:4, marginBottom:10}}></div>
-                  <div style={{display:'flex', flexWrap:'wrap', gap:4}}>
-                    {[1,2,3,4].map(i => <div key={i} style={{width:'45%', height:30, background:'rgba(127,119,221,0.2)', borderRadius:4}}></div>)}
+                <div className="ss-item" style={{ display: 'flex', flexDirection: 'column', gap: 5, background: '#0F0F20' }}>
+                  <div style={{ height: 20, background: 'rgba(255,255,255,0.1)', borderRadius: 4, marginBottom: 10 }}></div>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
+                    {[1, 2, 3, 4].map(i => <div key={i} style={{ width: '45%', height: 30, background: 'rgba(127,119,221,0.2)', borderRadius: 4 }}></div>)}
                   </div>
                 </div>
-                <div className="ss-item" style={{display:'flex', flexDirection:'column', gap:8, background:'#0F0F20'}}>
-                  <div style={{display:'flex', alignItems:'center', gap:5}}>
-                    <div style={{width:20, height:20, borderRadius:'50%', background:'#39FF85'}}></div>
-                    <div style={{flex:1, height:10, background:'rgba(255,255,255,0.1)', borderRadius:2}}></div>
+                <div className="ss-item" style={{ display: 'flex', flexDirection: 'column', gap: 8, background: '#0F0F20' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+                    <div style={{ width: 20, height: 20, borderRadius: '50%', background: '#39FF85' }}></div>
+                    <div style={{ flex: 1, height: 10, background: 'rgba(255,255,255,0.1)', borderRadius: 2 }}></div>
                   </div>
-                  <div style={{height:30, background:'rgba(255,255,255,0.05)', borderRadius:4}}></div>
-                  <div style={{height:30, background:'rgba(255,255,255,0.05)', borderRadius:4}}></div>
+                  <div style={{ height: 30, background: 'rgba(255,255,255,0.05)', borderRadius: 4 }}></div>
+                  <div style={{ height: 30, background: 'rgba(255,255,255,0.05)', borderRadius: 4 }}></div>
                 </div>
-                <div className="ss-item" style={{display:'flex', flexDirection:'column', gap:5, background:'#0F0F20'}}>
-                  <div style={{flex:1, background:'#0D2B2B', borderRadius:4, display:'flex', alignItems:'center', justifyContent:'center'}}>
-                    <div style={{width:20, height:20, border:'2px solid #39FF85', borderRadius:'50%', borderTopColor:'transparent', animation:'spin 1s linear infinite'}}></div>
+                <div className="ss-item" style={{ display: 'flex', flexDirection: 'column', gap: 5, background: '#0F0F20' }}>
+                  <div style={{ flex: 1, background: '#0D2B2B', borderRadius: 4, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <div style={{ width: 20, height: 20, border: '2px solid #39FF85', borderRadius: '50%', borderTopColor: 'transparent', animation: 'spin 1s linear infinite' }}></div>
                   </div>
-                  <div style={{height:15, background:'var(--accent)', borderRadius:4}}></div>
+                  <div style={{ height: 15, background: 'var(--accent)', borderRadius: 4 }}></div>
                 </div>
               </div>
             </div>
-            <div className="proj-right" style={{perspective:1000, zIndex:2}}>
-               <div className="phone-mockup mini-phone" style={{width: 200, height:400, transform: `rotateY(${phoneRot.x}deg) rotateX(${phoneRot.y}deg)`, filter:'drop-shadow(0 30px 60px var(--accent-glow))'}}>
-                 <div className="phone-notch" style={{width:60, height:20}}></div>
-                 <div className="phone-screen" style={{padding: '30px 10px 10px', background: '#0A0A1E', display: 'block'}}>
-                   <div style={{color:'#fff', fontWeight:600, fontSize:14}}>ServeEas</div>
-                   <div style={{background:'rgba(255,255,255,0.05)', padding:8, borderRadius:6, marginTop:10}}>
-                     <div style={{fontSize:9, color:'var(--text-muted)'}}>Upcoming Booking</div>
-                     <div style={{fontSize:11, color:'#fff', fontWeight:'bold', marginTop:2}}>AC Service & Repair</div>
-                     <div style={{fontSize:9, color:'#39FF85', marginTop:2}}>Today, 2:00 PM</div>
-                   </div>
-                   <div style={{display:'flex', gap:5, marginTop:10}}>
-                     {['Cleaning', 'Plumbing', 'Electrical'].map((s, idx) => (
-                       <div key={idx} style={{flex:1, background:'rgba(127,119,221,0.1)', border:'1px solid var(--accent)', padding:4, borderRadius:4, textAlign:'center', fontSize:7, color:'#fff', display:'flex', alignItems:'center', justifyContent:'center'}}>{s}</div>
-                     ))}
-                   </div>
-                   <div style={{marginTop:10, flex: 1, minHeight:60, background:'rgba(57,255,133,0.05)', border:'1px dashed rgba(57,255,133,0.3)', borderRadius:6, display:'flex', alignItems:'center', justifyContent:'center', fontSize:10, color:'#39FF85'}}>
-                     📍 Map View
-                   </div>
-                   <div style={{position:'absolute', bottom:10, left:10, right:10, height:40, background:'rgba(255,255,255,0.1)', borderRadius:20, display:'flex', justifyContent:'space-around', alignItems:'center'}}>
-                     <div style={{width:16,height:16, borderRadius:'50%', background:'var(--accent)'}}></div>
-                     <div style={{width:16,height:16, borderRadius:'50%', background:'rgba(255,255,255,0.3)'}}></div>
-                     <div style={{width:16,height:16, borderRadius:'50%', background:'rgba(255,255,255,0.3)'}}></div>
-                   </div>
-                 </div>
-               </div>
+            <div className="proj-right" style={{ perspective: 1000, zIndex: 2 }}>
+              <div className="phone-mockup mini-phone" style={{ width: 200, height: 400, transform: `rotateY(${phoneRot.x}deg) rotateX(${phoneRot.y}deg)`, filter: 'drop-shadow(0 30px 60px var(--accent-glow))' }}>
+                <div className="phone-notch" style={{ width: 60, height: 20 }}></div>
+                <div className="phone-screen" style={{ padding: '30px 10px 10px', background: '#0A0A1E', display: 'block' }}>
+                  <div style={{ color: '#fff', fontWeight: 600, fontSize: 14 }}>ServeEas</div>
+                  <div style={{ background: 'rgba(255,255,255,0.05)', padding: 8, borderRadius: 6, marginTop: 10 }}>
+                    <div style={{ fontSize: 9, color: 'var(--text-muted)' }}>Upcoming Booking</div>
+                    <div style={{ fontSize: 11, color: '#fff', fontWeight: 'bold', marginTop: 2 }}>AC Service & Repair</div>
+                    <div style={{ fontSize: 9, color: '#39FF85', marginTop: 2 }}>Today, 2:00 PM</div>
+                  </div>
+                  <div style={{ display: 'flex', gap: 5, marginTop: 10 }}>
+                    {['Cleaning', 'Plumbing', 'Electrical'].map((s, idx) => (
+                      <div key={idx} style={{ flex: 1, background: 'rgba(127,119,221,0.1)', border: '1px solid var(--accent)', padding: 4, borderRadius: 4, textAlign: 'center', fontSize: 7, color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{s}</div>
+                    ))}
+                  </div>
+                  <div style={{ marginTop: 10, flex: 1, minHeight: 60, background: 'rgba(57,255,133,0.05)', border: '1px dashed rgba(57,255,133,0.3)', borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, color: '#39FF85' }}>
+                    📍 Map View
+                  </div>
+                  <div style={{ position: 'absolute', bottom: 10, left: 10, right: 10, height: 40, background: 'rgba(255,255,255,0.1)', borderRadius: 20, display: 'flex', justifyContent: 'space-around', alignItems: 'center' }}>
+                    <div style={{ width: 16, height: 16, borderRadius: '50%', background: 'var(--accent)' }}></div>
+                    <div style={{ width: 16, height: 16, borderRadius: '50%', background: 'rgba(255,255,255,0.3)' }}></div>
+                    <div style={{ width: 16, height: 16, borderRadius: '50%', background: 'rgba(255,255,255,0.3)' }}></div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -795,19 +795,19 @@ export default function App() {
       {/* EDUCATION */}
       <section id="education" className="container reveal">
         <h2 className="section-title">Education.json</h2>
-        <div className="shimmer-card glass diploma-card" style={{maxWidth:600, margin:'0 auto', padding:40, textAlign:'center'}}>
-          <svg width="100" height="60" viewBox="0 0 100 60" style={{margin:'0 auto 20px'}}>
-            <path className="constellation-path" d="M10,30 L30,10 L60,20 L80,50 L90,20" fill="none" stroke="var(--accent)" strokeWidth="1"/>
-            {[ {x:10,y:30}, {x:30,y:10}, {x:60,y:20}, {x:80,y:50}, {x:90,y:20} ].map((p,i) => <circle key={i} cx={p.x} cy={p.y} r="3" fill="#fff"/>)}
+        <div className="shimmer-card glass diploma-card" style={{ maxWidth: 600, margin: '0 auto', padding: 40, textAlign: 'center' }}>
+          <svg width="100" height="60" viewBox="0 0 100 60" style={{ margin: '0 auto 20px' }}>
+            <path className="constellation-path" d="M10,30 L30,10 L60,20 L80,50 L90,20" fill="none" stroke="var(--accent)" strokeWidth="1" />
+            {[{ x: 10, y: 30 }, { x: 30, y: 10 }, { x: 60, y: 20 }, { x: 80, y: 50 }, { x: 90, y: 20 }].map((p, i) => <circle key={i} cx={p.x} cy={p.y} r="3" fill="#fff" />)}
           </svg>
-          <h3 className="orbitron deg-title" style={{fontSize:24, color:'#fff'}}>Bachelor of Computer Applications</h3>
-          <div style={{color:'var(--text-muted)', margin:'10px 0'}}>📍 Shri V.J. Modha College of I.T., Gujarat</div>
-          
-          <div className="orbitron cgpa-val" style={{fontSize:48, color:'var(--accent)', marginTop:20}}><Counter target={7.56} duration={2000}/> <span style={{fontSize:20, color:'var(--text-muted)'}}>/10</span></div>
-          <div style={{fontSize:12, letterSpacing:2, color:'var(--text-muted)'}}>CGPA</div>
-          
-          <div className="cgpa-dots" style={{display:'flex', justifyContent:'center', gap:8, marginTop:20}}>
-            {[...Array(10)].map((_, i) => <div key={i} className={`cgpa-dot ${i<8 ? 'filled' : ''}`} style={{animationDelay: `${i*150}ms`}}></div>)}
+          <h3 className="orbitron deg-title" style={{ fontSize: 24, color: '#fff' }}>Bachelor of Computer Applications</h3>
+          <div style={{ color: 'var(--text-muted)', margin: '10px 0' }}>📍 Shri V.J. Modha College of I.T., Gujarat</div>
+
+          <div className="orbitron cgpa-val" style={{ fontSize: 48, color: 'var(--accent)', marginTop: 20 }}><Counter target={7.56} duration={2000} /> <span style={{ fontSize: 20, color: 'var(--text-muted)' }}>/10</span></div>
+          <div style={{ fontSize: 12, letterSpacing: 2, color: 'var(--text-muted)' }}>CGPA</div>
+
+          <div className="cgpa-dots" style={{ display: 'flex', justifyContent: 'center', gap: 8, marginTop: 20 }}>
+            {[...Array(10)].map((_, i) => <div key={i} className={`cgpa-dot ${i < 8 ? 'filled' : ''}`} style={{ animationDelay: `${i * 150}ms` }}></div>)}
           </div>
         </div>
       </section>
@@ -815,42 +815,42 @@ export default function App() {
       {/* CONTACT */}
       <section id="contact" className="container reveal">
         <h2 className="section-title">Contact.init()</h2>
-        <div className="contact-row" style={{display:'flex', justifyContent:'center', gap:40, marginBottom:40, flexWrap:'wrap'}}>
-          {[ {i:'📞', l:'Call Me', b:'+91 9574896847', h:'tel:9574896847'}, {i:'✉', l:'Email', b:'Click to email', h:'mailto:udayjamariya12@gmail.com'}, {i:'in', l:'Connect', b:'uday-jamariya', h:'https://linkedin.com/in/uday-jamariya'} ].map(p => (
-            <a key={p.l} href={p.h} target="_blank" className="pod-wrapper" style={{textDecoration:'none'}}>
+        <div className="contact-row" style={{ display: 'flex', justifyContent: 'center', gap: 40, marginBottom: 40, flexWrap: 'wrap' }}>
+          {[{ i: '📞', l: 'Call Me', b: '+91 9574896847', h: 'tel:9574896847' }, { i: '✉', l: 'Email', b: 'Click to email', h: 'mailto:udayjamariya12@gmail.com' }, { i: 'in', l: 'Connect', b: 'uday-jamariya', h: 'https://linkedin.com/in/uday-jamariya' }].map(p => (
+            <a key={p.l} href={p.h} target="_blank" className="pod-wrapper" style={{ textDecoration: 'none' }}>
               <div className="pod-inner">
-                <div className="pod-front"><div style={{fontSize:32}}>{p.i}</div><div style={{fontSize:12, marginTop:5, color:'var(--text-primary)'}}>{p.l}</div></div>
+                <div className="pod-front"><div style={{ fontSize: 32 }}>{p.i}</div><div style={{ fontSize: 12, marginTop: 5, color: 'var(--text-primary)' }}>{p.l}</div></div>
                 <div className="pod-back">{p.b}</div>
               </div>
             </a>
           ))}
         </div>
 
-        <div className="glass open-banner" style={{maxWidth:800, margin:'0 auto', padding:40, textAlign:'center'}}>
-          <p className="ob-text" style={{fontSize:16, color:'#fff', marginBottom:30}}>"Currently open to Flutter Developer roles — freelance, internship, or full-time."</p>
+        <div className="glass open-banner" style={{ maxWidth: 800, margin: '0 auto', padding: 40, textAlign: 'center' }}>
+          <p className="ob-text" style={{ fontSize: 16, color: '#fff', marginBottom: 30 }}>"Currently open to Flutter Developer roles — freelance, internship, or full-time."</p>
           <button className="btn-sweep transporter-btn" onClick={() => setFormOpen(!formOpen)}>
             Initiate Contact →
             <div className="beam"></div>
           </button>
-          
+
           <form className={`contact-form ${formOpen ? 'open' : ''}`} onSubmit={handleFormSubmit}>
-            <input className="form-input" placeholder="Name" required value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} />
-            <input className="form-input" type="email" placeholder="Email" required value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} />
-            <textarea className="form-input" rows="4" placeholder="Message" required value={formData.message} onChange={e => setFormData({...formData, message: e.target.value})}></textarea>
-            <button type="submit" className="btn-sweep" style={{width:'100%'}} disabled={isSending}>
+            <input className="form-input" placeholder="Name" required value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} />
+            <input className="form-input" type="email" placeholder="Email" required value={formData.email} onChange={e => setFormData({ ...formData, email: e.target.value })} />
+            <textarea className="form-input" rows="4" placeholder="Message" required value={formData.message} onChange={e => setFormData({ ...formData, message: e.target.value })}></textarea>
+            <button type="submit" className="btn-sweep" style={{ width: '100%' }} disabled={isSending}>
               {isSending ? 'Transmitting...' : 'Send Transmission'}
             </button>
           </form>
 
-          <div style={{marginTop:30, fontSize:14, color:'var(--text-muted)'}}>
-            Or reach me directly at <span style={{color:'var(--accent)', cursor:'pointer'}} onClick={copyEmail}>udayjamariya12@gmail.com</span>
+          <div style={{ marginTop: 30, fontSize: 14, color: 'var(--text-muted)' }}>
+            Or reach me directly at <span style={{ color: 'var(--accent)', cursor: 'pointer' }} onClick={copyEmail}>udayjamariya12@gmail.com</span>
           </div>
         </div>
       </section>
-      
+
       <div className={`toast ${toastMsg ? 'show' : ''}`}>{toastMsg}</div>
 
-      <div style={{textAlign:'center', padding:30, color:'var(--text-muted)', fontSize:12, borderTop:'1px solid rgba(255,255,255,0.05)', marginTop: 50}}>
+      <div style={{ textAlign: 'center', padding: 30, color: 'var(--text-muted)', fontSize: 12, borderTop: '1px solid rgba(255,255,255,0.05)', marginTop: 50 }}>
         Built with React · Designed in Zero Gravity · Uday Jamariya © 2026
       </div>
     </>
