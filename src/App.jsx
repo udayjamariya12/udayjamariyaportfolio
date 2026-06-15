@@ -617,32 +617,63 @@ export default function App() {
       {/* PROJECTS */}
       <section id="projects" className="container reveal">
         <h2 className="section-title">Projects.apk</h2>
-        <div className="holo-card glass" style={{padding:40, display:'flex', gap:40}} 
-          onMouseMove={e => {
-            const rect = e.currentTarget.getBoundingClientRect();
-            const x = e.clientX - rect.left; const y = e.clientY - rect.top;
-            const angle = Math.atan2(y - rect.height/2, x - rect.width/2) * 180 / Math.PI;
-            e.currentTarget.style.setProperty('--grad-angle', `${angle}deg`);
-          }}>
-          <div className="holo-overlay"></div>
-          <div className="proj-left" style={{zIndex:2}}>
-            <h3 className="orbitron" style={{fontSize:32, color:'#fff', marginBottom:10}}>Invoice Flow</h3>
-            <div className="live-btn"><div className="live-dot"></div> Live Preview</div>
-            <p style={{color:'var(--text-muted)', margin:'20px 0', lineHeight:1.6}}>A full-featured enterprise billing system for automobile service businesses — real-time invoice generation, PDF invoice sharing via WhatsApp, and business analytics.</p>
-            <div style={{display:'flex', gap:10, flexWrap:'wrap', marginBottom:20}}>
-              {['Invoice Gen', 'PDF Sharing', 'WhatsApp', 'Analytics'].map(f => <div key={f} className="feat-tag glass" style={{padding:'6px 12px', fontSize:12, color:'#39FF85', border:'1px solid #39FF85'}}>{f}</div>)}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '40px' }}>
+          <div className="holo-card glass" style={{padding:40, display:'flex', gap:40}} 
+            onMouseMove={e => {
+              const rect = e.currentTarget.getBoundingClientRect();
+              const x = e.clientX - rect.left; const y = e.clientY - rect.top;
+              const angle = Math.atan2(y - rect.height/2, x - rect.width/2) * 180 / Math.PI;
+              e.currentTarget.style.setProperty('--grad-angle', `${angle}deg`);
+            }}>
+            <div className="holo-overlay"></div>
+            <div className="proj-left" style={{zIndex:2}}>
+              <h3 className="orbitron" style={{fontSize:32, color:'#fff', marginBottom:10}}>Invoice Flow</h3>
+              <div className="live-btn"><div className="live-dot"></div> Live Preview</div>
+              <p style={{color:'var(--text-muted)', margin:'20px 0', lineHeight:1.6}}>A full-featured enterprise billing system for automobile service businesses — real-time invoice generation, PDF invoice sharing via WhatsApp, and business analytics.</p>
+              <div style={{display:'flex', gap:10, flexWrap:'wrap', marginBottom:20}}>
+                {['Invoice Gen', 'PDF Sharing', 'WhatsApp', 'Analytics'].map(f => <div key={f} className="feat-tag glass" style={{padding:'6px 12px', fontSize:12, color:'#39FF85', border:'1px solid #39FF85'}}>{f}</div>)}
+              </div>
+              
+              {/* Screenshots strip */}
+              <div className="screenshot-strip">
+                {[1,2,3].map(i => <div key={i} className="ss-item"><div style={{height:'100%', background: i===1?'#3D1F8A':i===2?'#1A7A6E':'#0D2B2B', borderRadius:8}}></div></div>)}
+              </div>
             </div>
-            
-            {/* Screenshots strip */}
-            <div className="screenshot-strip">
-              {[1,2,3].map(i => <div key={i} className="ss-item"><div style={{height:'100%', background: i===1?'#3D1F8A':i===2?'#1A7A6E':'#0D2B2B', borderRadius:8}}></div></div>)}
+            <div className="proj-right" style={{perspective:1000, zIndex:2}}>
+               <div className="phone-mockup mini-phone" style={{width: 200, height:400, transform: `rotateY(${phoneRot.x}deg) rotateX(${phoneRot.y}deg)`, filter:'drop-shadow(0 30px 60px var(--accent-glow))'}}>
+                 <div className="phone-notch" style={{width:60, height:20}}></div>
+                 <div className="phone-screen"><div style={{color:'#fff', marginTop:20, textAlign:'center'}}>Invoice Flow App</div></div>
+               </div>
             </div>
           </div>
-          <div className="proj-right" style={{perspective:1000, zIndex:2}}>
-             <div className="phone-mockup mini-phone" style={{width: 200, height:400, transform: `rotateY(${phoneRot.x}deg) rotateX(${phoneRot.y}deg)`, filter:'drop-shadow(0 30px 60px var(--accent-glow))'}}>
-               <div className="phone-notch" style={{width:60, height:20}}></div>
-               <div className="phone-screen"><div style={{color:'#fff', marginTop:20, textAlign:'center'}}>Invoice Flow App</div></div>
-             </div>
+
+          <div className="holo-card glass" style={{padding:40, display:'flex', gap:40}} 
+            onMouseMove={e => {
+              const rect = e.currentTarget.getBoundingClientRect();
+              const x = e.clientX - rect.left; const y = e.clientY - rect.top;
+              const angle = Math.atan2(y - rect.height/2, x - rect.width/2) * 180 / Math.PI;
+              e.currentTarget.style.setProperty('--grad-angle', `${angle}deg`);
+            }}>
+            <div className="holo-overlay"></div>
+            <div className="proj-left" style={{zIndex:2}}>
+              <h3 className="orbitron" style={{fontSize:32, color:'#fff', marginBottom:10}}>ServeEas</h3>
+              <div className="live-btn"><div className="live-dot"></div> Live Preview</div>
+              <p style={{color:'var(--text-muted)', margin:'20px 0', lineHeight:1.6}}>A comprehensive service booking platform enabling seamless user interactions, service provider management, and easy scheduling.</p>
+              <div style={{display:'flex', gap:10, flexWrap:'wrap', marginBottom:20}}>
+                {['Service Booking', 'Provider Mgmt', 'Scheduling', 'Payments'].map(f => <div key={f} className="feat-tag glass" style={{padding:'6px 12px', fontSize:12, color:'#39FF85', border:'1px solid #39FF85'}}>{f}</div>)}
+              </div>
+              
+              {/* Screenshots strip */}
+              <div className="screenshot-strip">
+                {[1,2,3].map(i => <div key={i} className="ss-item"><div style={{height:'100%', background: i===1?'#3D1F8A':i===2?'#1A7A6E':'#0D2B2B', borderRadius:8}}></div></div>)}
+              </div>
+            </div>
+            <div className="proj-right" style={{perspective:1000, zIndex:2}}>
+               <div className="phone-mockup mini-phone" style={{width: 200, height:400, transform: `rotateY(${phoneRot.x}deg) rotateX(${phoneRot.y}deg)`, filter:'drop-shadow(0 30px 60px var(--accent-glow))'}}>
+                 <div className="phone-notch" style={{width:60, height:20}}></div>
+                 <div className="phone-screen"><div style={{color:'#fff', marginTop:20, textAlign:'center'}}>ServeEas App</div></div>
+               </div>
+            </div>
           </div>
         </div>
       </section>
