@@ -183,6 +183,12 @@ const globalCSS = `
   .toast { position: fixed; bottom: -50px; left: 50%; transform: translateX(-50%); background: #39FF85; color: #000; padding: 10px 20px; border-radius: 20px; font-weight: bold; transition: bottom 0.3s; z-index: 2000; }
   .toast.show { bottom: 30px; }
 
+  @media (max-width: 1024px) {
+    .container { padding: 80px 20px; }
+    .solar-system { transform: scale(0.8); }
+    .hero-title { font-size: clamp(40px, 6vw, 70px); }
+  }
+
   @media (max-width: 768px) {
     #cursor-ring, #cursor-dot { display: none !important; }
     * { cursor: auto !important; }
@@ -194,11 +200,30 @@ const globalCSS = `
     .phone-mockup { width: 220px; height: 440px; margin: 0 auto; }
     .orbit-satellite { display: none; }
     .mission-card { margin-left: 15px; padding: 20px; }
-    .project-card { flex-direction: column; }
-    .proj-left, .proj-right { width: 100%; }
-    .mini-phone { margin: 0 auto; transform: none; width: 220px; }
+    .holo-card { flex-direction: column; padding: 20px !important; gap: 20px !important; }
+    .proj-left, .proj-right { width: 100%; text-align: center; }
+    .mini-phone { margin: 0 auto; transform: none; width: 220px; filter: none !important; }
     .diploma-card { padding: 30px 15px; }
     .spy-dots { display: none; }
+    .theme-btn, .rocket-btn { transform: scale(0.8); right: 10px; }
+    .contact-row { gap: 20px !important; }
+  }
+
+  @media (max-width: 425px) {
+    .container { padding: 60px 15px; }
+    .hero-title { font-size: clamp(32px, 8vw, 40px); }
+    .hero-subtitle { font-size: 14px; }
+    .stats-row { flex-wrap: wrap; gap: 10px; }
+    .stat-item { width: 45%; }
+    .hero-ctas { flex-direction: column; }
+    .btn-sweep, .btn-outline { width: 100%; padding: 12px; font-size: 14px; }
+    .phone-mockup { width: 200px; height: 400px; }
+    .tech-pill-wrapper { width: 80px; height: 26px; }
+    .tech-front, .tech-back { font-size: 9px; }
+    .mini-phone { width: 180px; height: 360px; }
+    .cgpa-val { font-size: 36px !important; }
+    .pod-wrapper { width: 100px; height: 100px; }
+    .open-banner { padding: 20px !important; }
   }
   .mobile-skills { display: none; }
 `;
