@@ -197,10 +197,15 @@ const globalCSS = `
     .mobile-skills { display: flex !important; flex-direction: column; gap: 15px; margin-top: 20px; }
     .hero { flex-direction: column; text-align: center; gap: 40px; padding-top: 100px; min-height: auto; }
     .hero-left, .hero-right { width: 100%; }
-    .stats-row, .hero-ctas { justify-content: center; }
+    .hero-title { font-size: clamp(36px, 10vw, 50px); line-height: 1.1; margin-bottom: 10px; }
+    .hero-subtitle { font-size: clamp(14px, 4vw, 16px); }
+    .eyebrow { font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .stats-row { justify-content: center; gap: 15px; flex-wrap: wrap; }
+    .hero-ctas { justify-content: center; flex-direction: column; width: 100%; gap: 15px; }
+    .hero-ctas > * { width: 100%; text-align: center; }
     .phone-mockup { width: 220px; height: 440px; margin: 0 auto; }
     .orbit-satellite { display: none; }
-    .mission-card { margin-left: 15px; padding: 20px; }
+    .mission-card { margin-left: 15px; padding: 25px 20px; }
     .holo-card { flex-direction: column; padding: 20px !important; gap: 20px !important; }
     .proj-left, .proj-right { width: 100%; text-align: center; }
     .mini-phone { margin: 0 auto; transform: none; width: 220px; filter: none !important; }
