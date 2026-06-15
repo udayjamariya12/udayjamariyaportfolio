@@ -190,11 +190,12 @@ const globalCSS = `
   }
 
   @media (max-width: 768px) {
+    .container { min-height: auto; padding: 60px 20px; }
     #cursor-ring, #cursor-dot { display: none !important; }
     * { cursor: auto !important; }
     .solar-system { display: none !important; }
-    .mobile-skills { display: flex !important; flex-direction: column; gap: 15px; }
-    .hero { flex-direction: column; text-align: center; gap: 40px; padding-top: 100px; }
+    .mobile-skills { display: flex !important; flex-direction: column; gap: 15px; margin-top: 20px; }
+    .hero { flex-direction: column; text-align: center; gap: 40px; padding-top: 100px; min-height: auto; }
     .hero-left, .hero-right { width: 100%; }
     .stats-row, .hero-ctas { justify-content: center; }
     .phone-mockup { width: 220px; height: 440px; margin: 0 auto; }
