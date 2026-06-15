@@ -456,20 +456,42 @@ export default function App() {
 
   const [formOpen, setFormOpen] = useState(false);
   const [formData, setFormData] = useState({ name: '', email: '', message: '' });
+  const [toastMsg, setToastMsg] = useState("");
+  const [isSending, setIsSending] = useState(false);
 
-  const handleFormSubmit = (e) => {
+  const handleFormSubmit = async (e) => {
     e.preventDefault();
-    const subject = `Portfolio Contact from ${formData.name}`;
-    const body = `Name: ${formData.name}\nEmail: ${formData.email}\n\nMessage:\n${formData.message}`;
-    window.location.href = `mailto:udayjamariya12@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-    setFormData({ name: '', email: '', message: '' });
-    setFormOpen(false);
+    setIsSending(true);
+    try {
+      const res = await fetch("https://formsubmit.co/ajax/udayjamariya12@gmail.com", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Accept": "application/json" },
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          message: formData.message,
+          _subject: `Portfolio Contact from ${formData.name}`
+        })
+      });
+      if (res.ok) {
+        setFormData({ name: '', email: '', message: '' });
+        setFormOpen(false);
+        setToastMsg("Message Sent! 🚀");
+        setTimeout(() => setToastMsg(""), 3000);
+      } else {
+        setToastMsg("Error sending message.");
+        setTimeout(() => setToastMsg(""), 3000);
+      }
+    } catch (err) {
+      setToastMsg("Network error.");
+      setTimeout(() => setToastMsg(""), 3000);
+    }
+    setIsSending(false);
   };
 
-  const [toast, setToast] = useState(false);
   const copyEmail = () => {
     navigator.clipboard.writeText("udayjamariya12@gmail.com");
-    setToast(true); setTimeout(() => setToast(false), 2000);
+    setToastMsg("Copied! ✓"); setTimeout(() => setToastMsg(""), 2000);
   };
 
   const phoneRef = useRef(null);
@@ -809,7 +831,9 @@ export default function App() {
             <input className="form-input" placeholder="Name" required value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} />
             <input className="form-input" type="email" placeholder="Email" required value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} />
             <textarea className="form-input" rows="4" placeholder="Message" required value={formData.message} onChange={e => setFormData({...formData, message: e.target.value})}></textarea>
-            <button type="submit" className="btn-sweep" style={{width:'100%'}}>Send Transmission</button>
+            <button type="submit" className="btn-sweep" style={{width:'100%'}} disabled={isSending}>
+              {isSending ? 'Transmitting...' : 'Send Transmission'}
+            </button>
           </form>
 
           <div style={{marginTop:30, fontSize:14, color:'var(--text-muted)'}}>
@@ -818,7 +842,7 @@ export default function App() {
         </div>
       </section>
       
-      <div className={`toast ${toast ? 'show' : ''}`}>Copied! ✓</div>
+      <div className={`toast ${toastMsg ? 'show' : ''}`}>{toastMsg}</div>
 
       <div style={{textAlign:'center', padding:30, color:'var(--text-muted)', fontSize:12, borderTop:'1px solid rgba(255,255,255,0.05)', marginTop: 50}}>
         Built with React · Designed in Zero Gravity · Uday Jamariya © 2026
