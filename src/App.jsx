@@ -455,6 +455,17 @@ export default function App() {
   }, []);
 
   const [formOpen, setFormOpen] = useState(false);
+  const [formData, setFormData] = useState({ name: '', email: '', message: '' });
+
+  const handleFormSubmit = (e) => {
+    e.preventDefault();
+    const subject = `Portfolio Contact from ${formData.name}`;
+    const body = `Name: ${formData.name}\nEmail: ${formData.email}\n\nMessage:\n${formData.message}`;
+    window.location.href = `mailto:udayjamariya12@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    setFormData({ name: '', email: '', message: '' });
+    setFormOpen(false);
+  };
+
   const [toast, setToast] = useState(false);
   const copyEmail = () => {
     navigator.clipboard.writeText("udayjamariya12@gmail.com");
@@ -794,12 +805,12 @@ export default function App() {
             <div className="beam"></div>
           </button>
           
-          <div className={`contact-form ${formOpen ? 'open' : ''}`}>
-            <input className="form-input" placeholder="Name" />
-            <input className="form-input" placeholder="Email" />
-            <textarea className="form-input" rows="4" placeholder="Message"></textarea>
-            <button className="btn-sweep" style={{width:'100%'}}>Send Transmission</button>
-          </div>
+          <form className={`contact-form ${formOpen ? 'open' : ''}`} onSubmit={handleFormSubmit}>
+            <input className="form-input" placeholder="Name" required value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} />
+            <input className="form-input" type="email" placeholder="Email" required value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} />
+            <textarea className="form-input" rows="4" placeholder="Message" required value={formData.message} onChange={e => setFormData({...formData, message: e.target.value})}></textarea>
+            <button type="submit" className="btn-sweep" style={{width:'100%'}}>Send Transmission</button>
+          </form>
 
           <div style={{marginTop:30, fontSize:14, color:'var(--text-muted)'}}>
             Or reach me directly at <span style={{color:'var(--accent)', cursor:'pointer'}} onClick={copyEmail}>udayjamariya12@gmail.com</span>
