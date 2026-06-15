@@ -809,7 +809,21 @@ const globalStyles = `
     font-size: 12px;
   }
 
+  .sk-pos-1 { position: absolute; top: 0; left: 0; }
+  .sk-pos-2 { position: absolute; top: 0; right: 0; }
+  .sk-pos-3 { z-index: 10; }
+  .sk-pos-4 { position: absolute; bottom: 0; left: 10%; }
+  .sk-pos-5 { position: absolute; bottom: 0; right: 10%; }
+
   @media (max-width: 768px) {
+    #custom-cursor, #cursor-trail { display: none !important; }
+    * { cursor: auto !important; }
+    
+    .sk-pos-1, .sk-pos-2, .sk-pos-3, .sk-pos-4, .sk-pos-5 {
+      position: relative !important;
+      top: auto !important; left: auto !important; right: auto !important; bottom: auto !important;
+      width: 100%;
+    }
     .hero-container { flex-direction: column; text-align: center; gap: 40px; }
     .hero-left, .hero-right { width: 100%; }
     .hero-ctas { justify-content: center; }
@@ -823,6 +837,15 @@ const globalStyles = `
     .open-banner { flex-direction: column; text-align: center; gap: 20px; }
     .ob-text { width: 100%; }
     .nav-links { display: none; }
+    .mission-header { flex-direction: column; gap: 15px; }
+    .mh-left { flex-direction: column; text-align: center; }
+    .mh-date { align-self: center; }
+    .mission-card { padding: 25px; }
+    .project-card { padding: 25px; }
+    .diploma-card { width: 100%; padding: 30px 20px; }
+    .mini-phone { margin: 0 auto; transform: none; width: 220px; }
+    .cgpa-dots { flex-wrap: wrap; }
+    .cgpa-val { font-size: 36px; }
   }
 `;
 
@@ -1126,7 +1149,7 @@ export default function App() {
         
         <div className="skills-clusters">
           {/* Languages */}
-          <div className="skill-cluster glass-card anti-gravity parallax-layer c-purple" style={{'--float-del': '0s', position: 'absolute', top: 0, left: 0}}>
+          <div className="skill-cluster glass-card anti-gravity parallax-layer c-purple sk-pos-1" style={{'--float-del': '0s'}}>
             <div className="cluster-title">🟣 Languages</div>
             <div className="cluster-pills">
               <div className="skill-pill primary-skill">Dart</div>
@@ -1136,7 +1159,7 @@ export default function App() {
           </div>
           
           {/* Frameworks */}
-          <div className="skill-cluster glass-card anti-gravity parallax-layer c-blue" style={{'--float-del': '1.2s', position: 'absolute', top: 0, right: 0}}>
+          <div className="skill-cluster glass-card anti-gravity parallax-layer c-blue sk-pos-2" style={{'--float-del': '1.2s'}}>
             <div className="cluster-title">🔵 Frameworks</div>
             <div className="cluster-pills">
               <div className="skill-pill flagship-skill">Flutter SDK</div>
@@ -1146,7 +1169,7 @@ export default function App() {
           </div>
 
           {/* State Mgmt */}
-          <div className="skill-cluster glass-card anti-gravity parallax-layer c-green" style={{'--float-del': '2.4s', zIndex: 10}}>
+          <div className="skill-cluster glass-card anti-gravity parallax-layer c-green sk-pos-3" style={{'--float-del': '2.4s'}}>
             <div className="core-label">Core Expertise</div>
             <div className="cluster-title">🟢 State Management</div>
             <div className="cluster-pills">
@@ -1157,7 +1180,7 @@ export default function App() {
           </div>
 
           {/* Databases */}
-          <div className="skill-cluster glass-card anti-gravity parallax-layer c-yellow" style={{'--float-del': '0.6s', position: 'absolute', bottom: 0, left: '10%'}}>
+          <div className="skill-cluster glass-card anti-gravity parallax-layer c-yellow sk-pos-4" style={{'--float-del': '0.6s'}}>
             <div className="cluster-title">🟡 Databases</div>
             <div className="cluster-pills">
               <div className="skill-pill">SQLite</div>
@@ -1167,7 +1190,7 @@ export default function App() {
           </div>
 
           {/* Tools */}
-          <div className="skill-cluster glass-card anti-gravity parallax-layer c-white" style={{'--float-del': '1.8s', position: 'absolute', bottom: 0, right: '10%'}}>
+          <div className="skill-cluster glass-card anti-gravity parallax-layer c-white sk-pos-5" style={{'--float-del': '1.8s'}}>
             <div className="cluster-title">⚪ Other Skills</div>
             <div className="cluster-pills">
               <div className="skill-pill">REST API</div>
