@@ -636,13 +636,49 @@ export default function App() {
               
               {/* Screenshots strip */}
               <div className="screenshot-strip">
-                {[1,2,3].map(i => <div key={i} className="ss-item"><div style={{height:'100%', background: i===1?'#3D1F8A':i===2?'#1A7A6E':'#0D2B2B', borderRadius:8}}></div></div>)}
+                <div className="ss-item" style={{display:'flex', flexDirection:'column', gap:5, background:'#0F0F20'}}>
+                  <div style={{height:20, background:'rgba(255,255,255,0.1)', borderRadius:4}}></div>
+                  <div style={{flex:1, display:'flex', alignItems:'flex-end', gap:4}}>
+                    <div style={{flex:1, height:'40%', background:'var(--accent)', borderRadius:'2px 2px 0 0'}}></div>
+                    <div style={{flex:1, height:'70%', background:'#1A7A6E', borderRadius:'2px 2px 0 0'}}></div>
+                    <div style={{flex:1, height:'50%', background:'#3D1F8A', borderRadius:'2px 2px 0 0'}}></div>
+                  </div>
+                </div>
+                <div className="ss-item" style={{display:'flex', flexDirection:'column', gap:5, background:'#0F0F20'}}>
+                  <div style={{height:10, width:'50%', background:'var(--text-muted)', borderRadius:2}}></div>
+                  {[1,2,3,4].map(i => <div key={i} style={{height:15, background:'rgba(255,255,255,0.05)', borderRadius:4}}></div>)}
+                </div>
+                <div className="ss-item" style={{display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', background:'#0F0F20'}}>
+                  <div style={{width:40, height:50, background:'#fff', borderRadius:2, position:'relative'}}>
+                    <div style={{position:'absolute', top:5, left:5, width:15, height:15, background:'#ef4444', borderRadius:2}}></div>
+                    <div style={{position:'absolute', top:25, left:5, right:5, height:2, background:'#ccc'}}></div>
+                    <div style={{position:'absolute', top:30, left:5, right:15, height:2, background:'#ccc'}}></div>
+                  </div>
+                </div>
               </div>
             </div>
             <div className="proj-right" style={{perspective:1000, zIndex:2}}>
                <div className="phone-mockup mini-phone" style={{width: 200, height:400, transform: `rotateY(${phoneRot.x}deg) rotateX(${phoneRot.y}deg)`, filter:'drop-shadow(0 30px 60px var(--accent-glow))'}}>
                  <div className="phone-notch" style={{width:60, height:20}}></div>
-                 <div className="phone-screen"><div style={{color:'#fff', marginTop:20, textAlign:'center'}}>Invoice Flow App</div></div>
+                 <div className="phone-screen" style={{padding: '30px 10px 10px', background: '#0A0A1E', display: 'block'}}>
+                   <div style={{color:'#fff', fontWeight:600, fontSize:14}}>Invoice Flow</div>
+                   <div style={{display:'flex', gap:5, marginTop:10}}>
+                     <div style={{flex:1, background:'var(--accent)', padding:5, borderRadius:4, textAlign:'center'}}><div style={{fontWeight:'bold', fontSize:12, color:'#fff'}}>24</div><div style={{fontSize:8, color:'#fff'}}>Invs</div></div>
+                     <div style={{flex:1, background:'#1A7A6E', padding:5, borderRadius:4, textAlign:'center'}}><div style={{fontWeight:'bold', color:'#fff', fontSize:12}}>18</div><div style={{fontSize:8, color:'#fff'}}>Clients</div></div>
+                   </div>
+                   <div style={{fontSize:10, color:'#fff', marginTop:15, marginBottom:5}}>Recent Activity</div>
+                   {[['Ramesh', '#39FF85'],['Patel', '#eab308'],['Shah', '#ef4444']].map((r, idx) => (
+                     <div key={idx} style={{display:'flex', justifyContent:'space-between', alignItems:'center', padding:6, background:'rgba(255,255,255,0.05)', borderRadius:4, marginTop:4}}>
+                       <div style={{fontSize:9, color:'#fff'}}>{r[0]}</div>
+                       <div style={{width:6, height:6, borderRadius:'50%', background:r[1]}}></div>
+                     </div>
+                   ))}
+                   <div style={{position:'absolute', bottom:10, left:10, right:10, height:40, background:'rgba(255,255,255,0.1)', borderRadius:20, display:'flex', justifyContent:'space-around', alignItems:'center'}}>
+                     <div style={{width:16,height:16, borderRadius:'50%', background:'var(--accent)'}}></div>
+                     <div style={{width:16,height:16, borderRadius:'50%', background:'rgba(255,255,255,0.3)'}}></div>
+                     <div style={{width:16,height:16, borderRadius:'50%', background:'rgba(255,255,255,0.3)'}}></div>
+                   </div>
+                 </div>
                </div>
             </div>
           </div>
@@ -665,13 +701,52 @@ export default function App() {
               
               {/* Screenshots strip */}
               <div className="screenshot-strip">
-                {[1,2,3].map(i => <div key={i} className="ss-item"><div style={{height:'100%', background: i===1?'#3D1F8A':i===2?'#1A7A6E':'#0D2B2B', borderRadius:8}}></div></div>)}
+                <div className="ss-item" style={{display:'flex', flexDirection:'column', gap:5, background:'#0F0F20'}}>
+                  <div style={{height:20, background:'rgba(255,255,255,0.1)', borderRadius:4, marginBottom:10}}></div>
+                  <div style={{display:'flex', flexWrap:'wrap', gap:4}}>
+                    {[1,2,3,4].map(i => <div key={i} style={{width:'45%', height:30, background:'rgba(127,119,221,0.2)', borderRadius:4}}></div>)}
+                  </div>
+                </div>
+                <div className="ss-item" style={{display:'flex', flexDirection:'column', gap:8, background:'#0F0F20'}}>
+                  <div style={{display:'flex', alignItems:'center', gap:5}}>
+                    <div style={{width:20, height:20, borderRadius:'50%', background:'#39FF85'}}></div>
+                    <div style={{flex:1, height:10, background:'rgba(255,255,255,0.1)', borderRadius:2}}></div>
+                  </div>
+                  <div style={{height:30, background:'rgba(255,255,255,0.05)', borderRadius:4}}></div>
+                  <div style={{height:30, background:'rgba(255,255,255,0.05)', borderRadius:4}}></div>
+                </div>
+                <div className="ss-item" style={{display:'flex', flexDirection:'column', gap:5, background:'#0F0F20'}}>
+                  <div style={{flex:1, background:'#0D2B2B', borderRadius:4, display:'flex', alignItems:'center', justifyContent:'center'}}>
+                    <div style={{width:20, height:20, border:'2px solid #39FF85', borderRadius:'50%', borderTopColor:'transparent', animation:'spin 1s linear infinite'}}></div>
+                  </div>
+                  <div style={{height:15, background:'var(--accent)', borderRadius:4}}></div>
+                </div>
               </div>
             </div>
             <div className="proj-right" style={{perspective:1000, zIndex:2}}>
                <div className="phone-mockup mini-phone" style={{width: 200, height:400, transform: `rotateY(${phoneRot.x}deg) rotateX(${phoneRot.y}deg)`, filter:'drop-shadow(0 30px 60px var(--accent-glow))'}}>
                  <div className="phone-notch" style={{width:60, height:20}}></div>
-                 <div className="phone-screen"><div style={{color:'#fff', marginTop:20, textAlign:'center'}}>ServeEas App</div></div>
+                 <div className="phone-screen" style={{padding: '30px 10px 10px', background: '#0A0A1E', display: 'block'}}>
+                   <div style={{color:'#fff', fontWeight:600, fontSize:14}}>ServeEas</div>
+                   <div style={{background:'rgba(255,255,255,0.05)', padding:8, borderRadius:6, marginTop:10}}>
+                     <div style={{fontSize:9, color:'var(--text-muted)'}}>Upcoming Booking</div>
+                     <div style={{fontSize:11, color:'#fff', fontWeight:'bold', marginTop:2}}>AC Service & Repair</div>
+                     <div style={{fontSize:9, color:'#39FF85', marginTop:2}}>Today, 2:00 PM</div>
+                   </div>
+                   <div style={{display:'flex', gap:5, marginTop:10}}>
+                     {['Cleaning', 'Plumbing', 'Electrical'].map((s, idx) => (
+                       <div key={idx} style={{flex:1, background:'rgba(127,119,221,0.1)', border:'1px solid var(--accent)', padding:4, borderRadius:4, textAlign:'center', fontSize:7, color:'#fff', display:'flex', alignItems:'center', justifyContent:'center'}}>{s}</div>
+                     ))}
+                   </div>
+                   <div style={{marginTop:10, flex: 1, minHeight:60, background:'rgba(57,255,133,0.05)', border:'1px dashed rgba(57,255,133,0.3)', borderRadius:6, display:'flex', alignItems:'center', justifyContent:'center', fontSize:10, color:'#39FF85'}}>
+                     📍 Map View
+                   </div>
+                   <div style={{position:'absolute', bottom:10, left:10, right:10, height:40, background:'rgba(255,255,255,0.1)', borderRadius:20, display:'flex', justifyContent:'space-around', alignItems:'center'}}>
+                     <div style={{width:16,height:16, borderRadius:'50%', background:'var(--accent)'}}></div>
+                     <div style={{width:16,height:16, borderRadius:'50%', background:'rgba(255,255,255,0.3)'}}></div>
+                     <div style={{width:16,height:16, borderRadius:'50%', background:'rgba(255,255,255,0.3)'}}></div>
+                   </div>
+                 </div>
                </div>
             </div>
           </div>
