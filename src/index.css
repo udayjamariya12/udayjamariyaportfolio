@@ -334,57 +334,7 @@ h1, h2, h3, .orbitron {
 .pill-white { border-left: 4px solid #f8fafc; }
 
 
-/* Experience Section */
-.mission-card {
-  max-width: 800px;
-  width: 100%;
-  padding: 3rem;
-  position: relative;
-  overflow: hidden;
-  animation: float-slow 8s ease-in-out infinite;
-}
 
-.mission-card::before {
-  content: 'TOP SECRET / MISSION LOG';
-  position: absolute;
-  top: 15px;
-  left: 20px;
-  font-family: monospace;
-  color: rgba(255, 255, 255, 0.3);
-  font-size: 0.8rem;
-  letter-spacing: 2px;
-}
-
-.mission-title {
-  color: var(--accent-primary);
-  font-size: 2rem;
-  margin-bottom: 1rem;
-  margin-top: 1rem;
-}
-
-.mission-client {
-  font-size: 1.2rem;
-  color: var(--text-secondary);
-  margin-bottom: 2rem;
-}
-
-.mission-objectives {
-  list-style-type: none;
-}
-
-.mission-objectives li {
-  margin-bottom: 1rem;
-  position: relative;
-  padding-left: 25px;
-  line-height: 1.6;
-}
-
-.mission-objectives li::before {
-  content: '▸';
-  position: absolute;
-  left: 0;
-  color: var(--accent-secondary);
-}
 
 /* Projects Section */
 .projects-container {
