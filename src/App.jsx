@@ -18,7 +18,7 @@ const globalCSS = `
   /* Utilities */
   .glass { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(12px); border-radius: 20px; }
   .section-title { font-size: clamp(28px, 4vw, 48px); text-align: center; text-shadow: 0 0 30px var(--accent-glow); margin-bottom: 3rem; }
-  .eyebrow { color: var(--text-muted); font-family: monospace; text-align: center; margin-bottom: 0.5rem; font-size: 14px; }
+  .eyebrow { color: var(--text-muted); font-family: monospace; text-align: left; margin-bottom: 0.5rem; font-size: 14px; }
   
   /* Nebulas */
   .nebula { position: fixed; filter: blur(120px); border-radius: 50%; opacity: 0.12; pointer-events: none; z-index: -2; animation: nebPulse 8s infinite alternate; }
@@ -198,8 +198,8 @@ const globalCSS = `
     .hero { flex-direction: column; text-align: center; gap: 40px; padding-top: 100px; min-height: auto; }
     .hero-left, .hero-right { width: 100%; }
     .hero-title { font-size: clamp(36px, 10vw, 50px); line-height: 1.1; margin-bottom: 10px; }
-    .hero-subtitle { font-size: clamp(14px, 4vw, 16px); }
-    .eyebrow { font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .hero-subtitle { font-size: clamp(14px, 4vw, 16px); margin-bottom: 20px; }
+    .eyebrow { font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: center; margin-bottom: 10px; }
     .stats-row { justify-content: center; gap: 15px; flex-wrap: wrap; }
     .hero-ctas { justify-content: center; flex-direction: column; width: 100%; gap: 15px; }
     .hero-ctas > * { width: 100%; text-align: center; }
@@ -541,8 +541,8 @@ export default function App() {
       <section id="hero" className="container reveal">
         <div className="hero">
           <div className="hero-left">
-            <div className="eyebrow" style={{textAlign:'left'}}>&lt; {typeTextHero} <span style={{animation:'blink 1s step-end infinite'}}>|</span> /&gt;</div>
             <h1 className="hero-title glitch">Uday<br/>Jamariya</h1>
+            <div className="eyebrow">&lt; {typeTextHero} <span style={{animation:'blink 1s step-end infinite'}}>|</span> /&gt;</div>
             <p className="hero-subtitle">Cross-Platform · Clean Architecture</p>
             
             <div className="stats-row">
