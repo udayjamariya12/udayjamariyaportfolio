@@ -2,7 +2,7 @@ export default function Experience() {
   return (
     <section className="py-24 px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto" id="experience">
       <h2 className="font-headline-md text-headline-md text-primary orbitron-glow mb-12 reveal">Experience.log</h2>
-      
+
       <div className="glass-card p-8 md:p-12 rounded-3xl reveal parallax-target">
         <div className="flex flex-col md:flex-row justify-between mb-8 gap-4">
           <div>
@@ -10,15 +10,15 @@ export default function Experience() {
             <p className="text-primary">Flutter Developer Trainee</p>
           </div>
           <div className="text-on-surface-variant text-left md:text-right">
-            <p>June 2024 - Dec 2024</p>
+            <p>Dec 2025 - May 2026</p>
             <p className="text-xs uppercase tracking-widest">6 Months Journey</p>
           </div>
         </div>
-        
+
         <p className="text-body-lg text-on-surface-variant mb-8 leading-relaxed">
           Intensive internship focusing on high-quality Flutter application development, mastering state management, and backend integration.
         </p>
-        
+
         <ul className="space-y-4 mb-10">
           <li className="flex gap-4">
             <span className="text-primary font-bold">▸</span>
@@ -41,7 +41,7 @@ export default function Experience() {
             <p className="text-on-surface-variant">Collaborated in agile sprints, ensuring timely delivery of modular code components.</p>
           </li>
         </ul>
-        
+
         <div className="flex flex-wrap gap-2">
           <span className="px-3 py-1 bg-white/5 border border-white/10 rounded-lg text-xs text-on-surface-variant">Flutter</span>
           <span className="px-3 py-1 bg-white/5 border border-white/10 rounded-lg text-xs text-on-surface-variant">Dart</span>
