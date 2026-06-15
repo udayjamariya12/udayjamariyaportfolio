@@ -281,6 +281,7 @@ function Starfield() {
   const canvasRef = useRef(null);
   useEffect(() => {
     const c = canvasRef.current;
+    if (!c) return;
     const ctx = c.getContext('2d');
     let frame;
     const resize = () => { c.width = window.innerWidth; c.height = window.innerHeight; };
@@ -321,7 +322,7 @@ function Starfield() {
     draw();
     return () => { window.removeEventListener('resize', resize); cancelAnimationFrame(frame); }
   }, []);
-  return <canvas id="starfield" style={{position:'fixed', top:0, left:0, zIndex:-3, pointerEvents:'none'}}></canvas>;
+  return <canvas ref={canvasRef} id="starfield" style={{position:'fixed', top:0, left:0, zIndex:-3, pointerEvents:'none'}}></canvas>;
 }
 
 function useTypewriter(words) {
